@@ -221,7 +221,6 @@ public class catalogMain extends JFrame {
 					JOptionPane.showMessageDialog(null, "Please correct all errors first.");
 				}else {
 					beginExport();
-					
 				}
 			}
 		}

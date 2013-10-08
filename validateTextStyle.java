@@ -52,6 +52,12 @@ public class validateTextStyle extends commonValidate {
 						checkIDAndDuplicate('T', columnLetter, rowIndex, tempColumnIndex);
 					}
 					
+					// Check size
+					checkSize(row, 4, "E");
+					
+					// Check opacity
+					checkOpacity(row, 12, "M");
+					
 					// Check color valid
 					if(row.getCell(3) != null && row.getCell(3).getCellType() != Cell.CELL_TYPE_BLANK) {
 						String haloColorRadius = row.getCell(3).toString();

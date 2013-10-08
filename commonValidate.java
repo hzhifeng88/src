@@ -2,9 +2,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.StringTokenizer;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+
 import org.apache.poi.ss.usermodel.*;
 
 public class commonValidate {
@@ -31,6 +33,8 @@ public class commonValidate {
 	private ArrayList<String> storePencilLineJoin = new ArrayList<String>();
 	private ArrayList<String> storePencilLineCap = new ArrayList<String>();
 	public ArrayList<String> storeTextGeometry = new ArrayList<String>();
+	private ArrayList<String> storeErrorSize = new ArrayList<String>();
+	private ArrayList<String> storeOpacityError = new ArrayList<String>();
 
 	public commonValidate(Sheet sheet, Workbook originalWorkbook, ArrayList<String> colorList, HTMLEditorKit kit, HTMLDocument doc){
 
@@ -233,6 +237,30 @@ public class commonValidate {
 		}
 	}
 
+	public void checkSize(Row row, int columnIndex, String columnLetter) {
+		
+		// Check Size (positive)
+		if(row.getCell(columnIndex) != null && row.getCell(columnIndex).getCellType() != Cell.CELL_TYPE_BLANK) {
+			if(Double.parseDouble(row.getCell(columnIndex).toString()) <= 0.0) {
+				hasError = true;
+				storeErrorSize.add(columnLetter + Integer.toString(row.getRowNum() + 1));
+			}
+		}
+	}
+	
+	public void checkOpacity(Row row, int columnIndex, String columnLetter) {
+		
+		// Opacity should be from 0 to 1
+		if(row.getCell(columnIndex) != null && row.getCell(columnIndex).getCellType() != Cell.CELL_TYPE_BLANK) {
+			
+			Double opacityDouble = Double.parseDouble(row.getCell(columnIndex).toString());
+			if(opacityDouble < 0 || opacityDouble > 1.0) {
+				hasError = true;
+				storeOpacityError.add(columnLetter + Integer.toString(row.getRowNum() + 1));
+			}
+		}
+	}
+	
 	public void matchColor(String tempStringColor, String currentColumn, int rowIndex) {
 
 		if(storeColorID.contains(tempStringColor)){
@@ -401,6 +429,18 @@ public class commonValidate {
 				for(int errorCount = 0; errorCount < storeErrorMsg.size(); errorCount++) {
 					kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>" + storeErrorMsg.get(errorCount) + " <font color=#ED0E3F>(Row: " + storeErrorRow.get(errorCount) + ")</font color></font>", 0, 0,null);
 				}
+			}
+			
+			if(storeErrorSize.isEmpty() == false) {
+				hasError = true;
+				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Size must be larger than 0.</font color></font>", 0, 0,null);
+				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeErrorSize + "</font color></font>", 0, 0, null);
+			}
+			
+			if(storeOpacityError.isEmpty() == false) {
+				hasError = true;
+				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Opacity must be from 0 to 1.</font color></font>", 0, 0,null);
+				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeOpacityError + "</font color></font>", 0, 0, null);
 			}
 		} catch (BadLocationException | IOException e) {
 			e.printStackTrace();

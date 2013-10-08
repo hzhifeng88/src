@@ -19,7 +19,7 @@ public class exportReport extends JFrame {
 	public exportReport(final catalogMain mainWindow) {
 		
 		this.mainWindow = mainWindow;       
-		setTitle("CartoCSS Report");     
+		setTitle("Export to CartoCSS Report");     
 		setSize(350, 350);      
 		setVisible(true);       
 		setResizable(false); 
@@ -69,7 +69,7 @@ public class exportReport extends JFrame {
 		scrollPane.setViewport(viewport);
 		
 		try {
-			kit.insertHTML(doc, doc.getLength(), "<font size = 3><font color=#0A23C4><b>Export Status </b></font color></font>", 0, 0,null);
+			kit.insertHTML(doc, doc.getLength(), "<font size = 3><font color=#0A23C4><b>** The file(s) will be exported to your Desktop </b></font color></font>", 0, 0,null);
 		}catch (BadLocationException | IOException e) {
 			e.printStackTrace();
 		} 

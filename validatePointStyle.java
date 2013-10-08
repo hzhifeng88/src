@@ -48,6 +48,14 @@ public class validatePointStyle extends commonValidate {
 						checkIDAndDuplicate('P', columnLetter, rowIndex, tempColumnIndex);
 					}
 				
+					// Check size
+					checkSize(row, 1, "B");
+					checkSize(row, 11, "L");
+					
+					// Check opacity
+					checkOpacity(row, 8, "I");
+					checkOpacity(row, 15, "P");
+					
 					// Check color valid
 					if(row.getCell(7) != null && row.getCell(7).getCellType() != Cell.CELL_TYPE_BLANK) {
 						matchColor(row.getCell(7).toString(), "H", rowIndex);

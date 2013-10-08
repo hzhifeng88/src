@@ -53,6 +53,12 @@ public class validateLineStyle extends commonValidate {
 						checkIDAndDuplicate('L', columnLetter, rowIndex, tempColumnIndex);
 					}
 
+					// Check size
+					checkSize(row, 5, "F");
+					
+					// Check opacity
+					checkOpacity(row, 2, "C");
+					
 					// Check color valid
 					if(row.getCell(1) != null && row.getCell(1).getCellType() != Cell.CELL_TYPE_BLANK) {
 						matchColor(row.getCell(1).toString(), "B", rowIndex);

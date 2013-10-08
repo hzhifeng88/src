@@ -53,6 +53,9 @@ public class validatePolygonStyle extends commonValidate {
 						checkIDAndDuplicate('A', columnLetter, rowIndex, tempColumnIndex);
 					}
 
+					// Check opacity
+					checkOpacity(row, 3, "D");
+					
 					// Check color valid
 					if(row.getCell(2) != null && row.getCell(2).getCellType() != Cell.CELL_TYPE_BLANK) {
 						matchColor(row.getCell(2).toString(), "C", rowIndex);
