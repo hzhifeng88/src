@@ -1,17 +1,18 @@
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+
 import org.apache.poi.ss.usermodel.*;
 
-public class beginExport  extends commonExport{
+public class beginExport extends commonExport{
 
 	private Workbook workbook;
 	private Sheet layersSheet;
 	private BufferedWriter writer;
-	public ArrayList<String> storeInvalidFont = new ArrayList<String>();
-	private String currentModel;
-	private String currentClass;
+	private ArrayList<String> storeInvalidFont = new ArrayList<String>();
+	private String fileName;
 	private String desktopPath = System.getProperty("user.home") + "/Desktop"; 
 	private String filePath = desktopPath.replace("\\", "/"); 
 
@@ -20,67 +21,58 @@ public class beginExport  extends commonExport{
 	private exportPolygon exPolygon;
 	private exportText exText;
 	private exportRaster exRaster;
-	private exportReport cartoReport;
 
-	public beginExport(Workbook workbook, exportReport cartoReport){
+	public beginExport(Workbook workbook, String fileName){
 
 		super(workbook.getSheet("Colors"));
 		this.workbook = workbook;
-		this.cartoReport = cartoReport;
+		this.fileName = fileName;
 	}
 
-	public void startExport() {
+	public boolean checkFileExist() {
+
+		File file = new File(filePath + "/" + fileName +".mss");
+
+		if(!file.exists()) {
+			return false;
+		}
+		return true;
+	}
+
+	public ArrayList<String> exportNow(ArrayList<layersClassObject> storeClassObjects) {
 
 		layersSheet = workbook.getSheet("Layers");
 		String geometryType = null;
 		String styleID = null;
-		
+
 		try {
 
 			Row currentRow = layersSheet.getRow(4);
-			currentModel = currentRow.getCell(0).toString();
-			currentClass = currentRow.getCell(2).toString();
 
-			writer = new BufferedWriter(new FileWriter(filePath + "/" + currentModel + " - " + currentClass + ".mss"));
+			writer = new BufferedWriter(new FileWriter(filePath + "/" + fileName +".mss"));
 			String storeCartoCSS = "";
 
 			for (int rowIndex = 4; rowIndex <= layersSheet.getLastRowNum(); rowIndex++) {
 
 				currentRow = layersSheet.getRow(rowIndex);
-				String tempModel = currentRow.getCell(0).toString();
 				String tempClass = currentRow.getCell(2).toString();
 
-				if(tempModel.equalsIgnoreCase(currentModel) && tempClass.equalsIgnoreCase(currentClass)) {
+				geometryType = currentRow.getCell(4).toString();
+				styleID = currentRow.getCell(6).toString();
 
-					geometryType = currentRow.getCell(4).toString();
-					styleID = currentRow.getCell(6).toString();
-					
-					appendLayerConditions(currentRow, storeCartoCSS, writer, tempClass);
-					getRespectiveStyle(geometryType, styleID);
-					
-				}else {
-					writer.close();
-					currentModel = tempModel;
-					currentClass = tempClass;
-					writer = new BufferedWriter(new FileWriter(filePath + "/" + currentModel + " - " + currentClass + ".mss"));
-					
-					geometryType = currentRow.getCell(4).toString();
-					styleID = currentRow.getCell(6).toString();
-					
-					appendLayerConditions(currentRow, storeCartoCSS, writer, tempClass);
-					getRespectiveStyle(geometryType, styleID);
-				}
-				
+				appendLayerConditions(currentRow, storeCartoCSS, writer, tempClass, storeClassObjects);
+				getRespectiveStyle(geometryType, styleID);
+				writer.append("\r\n");
 			}
 			writer.close();
-			exText.printExportReport(storeInvalidFont);
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
+		return storeInvalidFont;
 	}
-	
+
 	public void getRespectiveStyle(String geometryType, String styleID) throws IOException {
-		
+
 		switch(geometryType) {
 
 		case "P":
@@ -88,7 +80,7 @@ public class beginExport  extends commonExport{
 				exPoint = new exportPoint(workbook, styleID);
 				exPoint.exportNow(writer);
 			}else if(styleID.charAt(0) == 'T') {
-				exText = new exportText(workbook, geometryType, styleID, cartoReport);
+				exText = new exportText(workbook, geometryType, styleID);
 				storeInvalidFont.addAll(exText.exportNow(writer));
 			}
 			break;
@@ -98,7 +90,7 @@ public class beginExport  extends commonExport{
 				exLine = new exportLine(workbook, styleID);
 				exLine.exportNow(writer);
 			}else if(styleID.charAt(0) == 'T') {
-				exText = new exportText(workbook, geometryType, styleID, cartoReport);
+				exText = new exportText(workbook, geometryType, styleID);
 				storeInvalidFont.addAll(exText.exportNow(writer));
 			}
 			break;

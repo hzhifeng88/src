@@ -41,6 +41,8 @@ public class validateLayers extends commonValidate {
 					
 					// Check for line break in cell
 					checkLineBreakInCells(row);
+					
+					checkClassValues(row);
 				}
 				
 				if(hasError == true) {

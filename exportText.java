@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import org.apache.poi.ss.usermodel.*;
 
 public class exportText extends commonExport {
@@ -8,17 +9,15 @@ public class exportText extends commonExport {
 	private String geometryType;
 	private String styleID;
 	private Sheet textSheet;
-	private exportReport cartoReport;
-	public ArrayList<String> storeInvalidFont = new ArrayList<String>();
+	private ArrayList<String> storeInvalidFont = new ArrayList<String>();
 
-	public exportText(Workbook workbook, String geometryType, String styleID, exportReport cartoReport) throws IOException {
+	public exportText(Workbook workbook, String geometryType, String styleID) throws IOException {
 
 		super(workbook.getSheet("Colors"));
 
 		this.geometryType = geometryType;
 		this.styleID = styleID;
 		this.textSheet = workbook.getSheet("TextStyle");
-		this.cartoReport = cartoReport;
 	}
 
 	public ArrayList<String> exportNow(BufferedWriter writer) throws IOException {
@@ -188,18 +187,5 @@ public class exportText extends commonExport {
 		// Solid color opacity
 		writer.append("\ttext-opacity: " + row.getCell(12) + ";");
 		writer.append("\r\n");
-
-	}
-	
-	public void printExportReport(ArrayList<String> storeInvalidFont) {
-		
-		if(storeInvalidFont.isEmpty() == false) {
-			cartoReport.writeHeader("TextStyle");
-			cartoReport.writeTextToReport("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>Specified font not found!</font color></font>");
-			cartoReport.writeTextToReport("<font size = 4> <font color=#0A23C4><font size = 3>** Default font <font color=#ED0E3F>\"Times New Roman Regular\" <font color=#0A23C4>is used.</font color></font>");
-			cartoReport.writeTextToReport("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeInvalidFont + "</font color></font>");
-		}else {
-			cartoReport.writeTextToReport("<font size = 4> <font color=#088542><br><b>-> </b><font size = 3>CartoCSS files has been successfully exported. </font color></font>");
-		}
 	}
 }

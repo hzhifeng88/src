@@ -27,7 +27,7 @@ public class commonValidate {
 	private ArrayList<String> storeDuplicateID = new ArrayList<String>();
 	private ArrayList<String> storeMissingValueCells = new ArrayList<String>();
 	private ArrayList<String> storeInvalidColorCells = new ArrayList<String>();
-	public ArrayList<String> storeReferenceErrorCells = new ArrayList<String>();
+	private ArrayList<String> storeReferenceErrorCells = new ArrayList<String>();
 	private ArrayList<String> storeErrorRow = new ArrayList<String>();
 	private ArrayList<String> storeErrorMsg = new ArrayList<String>();
 	private ArrayList<String> storePencilLineJoin = new ArrayList<String>();
@@ -35,6 +35,7 @@ public class commonValidate {
 	public ArrayList<String> storeTextGeometry = new ArrayList<String>();
 	private ArrayList<String> storeErrorSize = new ArrayList<String>();
 	private ArrayList<String> storeOpacityError = new ArrayList<String>();
+	private ArrayList<String> storeClassValueError = new ArrayList<String>();
 
 	public commonValidate(Sheet sheet, Workbook originalWorkbook, ArrayList<String> colorList, HTMLEditorKit kit, HTMLDocument doc){
 
@@ -238,7 +239,7 @@ public class commonValidate {
 	}
 
 	public void checkSize(Row row, int columnIndex, String columnLetter) {
-		
+
 		// Check Size (positive)
 		if(row.getCell(columnIndex) != null && row.getCell(columnIndex).getCellType() != Cell.CELL_TYPE_BLANK) {
 			if(Double.parseDouble(row.getCell(columnIndex).toString()) <= 0.0) {
@@ -247,12 +248,12 @@ public class commonValidate {
 			}
 		}
 	}
-	
+
 	public void checkOpacity(Row row, int columnIndex, String columnLetter) {
-		
+
 		// Opacity should be from 0 to 1
 		if(row.getCell(columnIndex) != null && row.getCell(columnIndex).getCellType() != Cell.CELL_TYPE_BLANK) {
-			
+
 			Double opacityDouble = Double.parseDouble(row.getCell(columnIndex).toString());
 			if(opacityDouble < 0 || opacityDouble > 1.0) {
 				hasError = true;
@@ -260,7 +261,7 @@ public class commonValidate {
 			}
 		}
 	}
-	
+
 	public void matchColor(String tempStringColor, String currentColumn, int rowIndex) {
 
 		if(storeColorID.contains(tempStringColor)){
@@ -361,6 +362,23 @@ public class commonValidate {
 		storeReferenceErrorCells.add(cell);
 	}
 
+	public void checkClassValues(Row row) {
+
+		String getClassValues = row.getCell(2).toString();
+		String allowedChar = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
+
+		for(int charCount = 0; charCount < getClassValues.length(); charCount++) {
+
+			char getEachChar = getClassValues.charAt(charCount);
+
+			if(allowedChar.indexOf(getEachChar) == -1) {
+				hasError = true;
+				storeClassValueError.add("C" + Integer.toString(row.getRowNum() + 1));
+				break;
+			}
+		}
+	}
+	
 	public boolean printFormatError() {
 
 		try {
@@ -430,17 +448,23 @@ public class commonValidate {
 					kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>" + storeErrorMsg.get(errorCount) + " <font color=#ED0E3F>(Row: " + storeErrorRow.get(errorCount) + ")</font color></font>", 0, 0,null);
 				}
 			}
-			
+
 			if(storeErrorSize.isEmpty() == false) {
 				hasError = true;
 				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Size must be larger than 0.</font color></font>", 0, 0,null);
 				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeErrorSize + "</font color></font>", 0, 0, null);
 			}
-			
+
 			if(storeOpacityError.isEmpty() == false) {
 				hasError = true;
 				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Opacity must be from 0 to 1.</font color></font>", 0, 0,null);
 				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeOpacityError + "</font color></font>", 0, 0, null);
+			}
+
+			if(storeClassValueError.isEmpty() == false) {
+				hasError = true;
+				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Class name(s) only accept A-Z, a-z, 0-9, dash and underscores.</font color></font>", 0, 0,null);
+				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeClassValueError + "</font color></font>", 0, 0, null);
 			}
 		} catch (BadLocationException | IOException e) {
 			e.printStackTrace();
