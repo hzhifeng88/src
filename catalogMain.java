@@ -4,7 +4,6 @@ import java.util.*;
 import java.awt.*;
 import java.awt.Color;
 import java.awt.event.*;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
@@ -32,14 +31,12 @@ public class catalogMain extends JFrame {
 	private JScrollPane scrollPane;
 	private ArrayList<Boolean> storeIsSheetsCorrect= new ArrayList<Boolean>();
 	private ArrayList<layersClassObject> storeClassObjects = new ArrayList<layersClassObject>();
-	private layersClassObject classObjects;
 	private HTMLEditorKit kit;
 	private HTMLDocument doc;
 	private beginValidate beginValidate;
 	private beginExport beginExport;
 	private exportReport cartoReport;
-
-	// ApachePOI (reading of excel)
+	private layersClassObject classObjects;
 	private Workbook workbook;
 	private Workbook originalWorkbook;
 
@@ -163,15 +160,25 @@ public class catalogMain extends JFrame {
 
 			Row row = layersSheet.getRow(rowIndex);
 
-			if(row.getCell(1) != null && row.getCell(1).getCellType() != Cell.CELL_TYPE_BLANK) {
-				classObjects = new layersClassObject(row.getCell(0).toString(), row.getCell(1).toString(), row.getCell(2).toString(), String.valueOf(rowIndex+1));
-			}else {
-				classObjects = new layersClassObject(row.getCell(0).toString(), null, row.getCell(2).toString(), String.valueOf(rowIndex+1));
+			if((row.getCell(1) != null && row.getCell(1).getCellType() != Cell.CELL_TYPE_BLANK) && (row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK)) {
+				
+				classObjects = new layersClassObject(row.getCell(0).toString(), row.getCell(1).toString(), row.getCell(2).toString(), String.valueOf(rowIndex+1), Double.parseDouble(row.getCell(11).toString()));
+				
+			}else if((row.getCell(1) != null && row.getCell(1).getCellType() != Cell.CELL_TYPE_BLANK) && (row.getCell(11) == null || row.getCell(11).getCellType() == Cell.CELL_TYPE_BLANK)) {
+				
+				classObjects = new layersClassObject(row.getCell(0).toString(), row.getCell(1).toString(), row.getCell(2).toString(), String.valueOf(rowIndex+1), 1);
+				
+			}else if((row.getCell(1) == null || row.getCell(1).getCellType() == Cell.CELL_TYPE_BLANK) && (row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK)) {
+				
+				classObjects = new layersClassObject(row.getCell(0).toString(), null, row.getCell(2).toString(), String.valueOf(rowIndex+1), Double.parseDouble(row.getCell(11).toString()));
+			}
+			else {
+				classObjects = new layersClassObject(row.getCell(0).toString(), null, row.getCell(2).toString(), String.valueOf(rowIndex+1), 1);
 			}
 			storeClassObjects.add(classObjects);
 		}
 		
-		// This for-loop sets true to objects which class has duplicates
+		// Sets true to objects which class has duplicates
 		if(storeClassObjects.isEmpty() == false) {
 			
 			for(int count = 0; count < storeClassObjects.size(); count++) {
@@ -204,7 +211,7 @@ public class catalogMain extends JFrame {
 		boolean isFileExist = beginExport.checkFileExist();
 
 		if(isFileExist == false) {
-
+			
 			ArrayList<String> storeInvalidFont = beginExport.exportNow(storeClassObjects);
 			mainWindow.setEnabled(false);   
 			cartoReport = new exportReport(mainWindow);
@@ -214,7 +221,7 @@ public class catalogMain extends JFrame {
 			int response = JOptionPane.showConfirmDialog(null, "File already exist. Overwrite? (Yes/No)", "Confirmation needed", JOptionPane.YES_NO_OPTION);
 
 			if(response == JOptionPane.YES_OPTION)  {
-
+				
 				ArrayList<String> storeInvalidFont = beginExport.exportNow(storeClassObjects);
 				mainWindow.setEnabled(false);   
 				cartoReport = new exportReport(mainWindow);

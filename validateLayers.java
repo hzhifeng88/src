@@ -18,7 +18,6 @@ public class validateLayers extends commonValidate {
 	}
 	
 	public boolean isSheetCorrect() {
-
 		return sheetCorrect;
 	}
 
@@ -51,7 +50,6 @@ public class validateLayers extends commonValidate {
 				}else {
 					sheetCorrect = true;
 				}
-				
 				referenceCheck();
 			}
 		}else {
@@ -75,7 +73,6 @@ public class validateLayers extends commonValidate {
 			referenceStyleID = row.getCell(styleIDIndex).toString();
 			getReferenceStyle(workbook, layersSheet, referenceStyleID, cellLocation, row.getCell(4).toString());
 		}
-
 		if(hasError == true) {
 			printReferenceError();
 		}else {

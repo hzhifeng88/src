@@ -523,7 +523,6 @@ public class commonValidate {
 
 		try {
 			kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> No error found! </font color></font>", 0, 0,null);
-
 		} catch (BadLocationException | IOException e) {
 			e.printStackTrace();
 		}

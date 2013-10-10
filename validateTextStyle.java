@@ -18,7 +18,6 @@ public class validateTextStyle extends commonValidate {
 	}
 	
 	public boolean isSheetCorrect() {
-
 		return sheetCorrect;
 	}
 	
@@ -89,7 +88,6 @@ public class validateTextStyle extends commonValidate {
 		for(int count = 0; count < storeTextGeometry.size(); count++) {
 			
 			if(row.getCell(tempColumnIndex).toString().equalsIgnoreCase(storeTextGeometry.get(count).substring(1).toString())) {
-				
 				char labelPlacement = storeTextGeometry.get(count).toString().charAt(0);
 				checkNow(row, rowIndex, labelPlacement);
 			}
@@ -108,7 +106,6 @@ public class validateTextStyle extends commonValidate {
 		}else if(labelPlacement == 'L') {
 			
 			if(((row.getCell(5) != null && row.getCell(5).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(6) != null && row.getCell(6).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(7) != null && row.getCell(7).getCellType() != Cell.CELL_TYPE_BLANK)) || ((row.getCell(8) == null || row.getCell(8).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(9) == null || row.getCell(9).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(10) == null || row.getCell(10).getCellType() == Cell.CELL_TYPE_BLANK))) {
-				
 				hasError = true;
 				storeErrorMsg.add("Error! Only column I, J and K must be filled in for line label placement.");
 				storeErrorRow.add(Integer.toString(rowIndex + 1));

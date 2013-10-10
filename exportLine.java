@@ -1,23 +1,27 @@
 import java.io.BufferedWriter;
 import java.io.IOException;
+
 import org.apache.poi.ss.usermodel.*;
 
 public class exportLine extends commonExport{
 
 	private String styleID;
 	private Sheet lineSheet;
+	private Workbook workbook;
 
 	public exportLine(Workbook workbook, String styleID) throws IOException {
 
 		super(workbook.getSheet("Colors"));
-
+		this.workbook = workbook;
 		this.styleID = styleID;
 		this.lineSheet = workbook.getSheet("LineStyle");
 	}
 
-	public void exportNow(BufferedWriter writer) throws IOException {
+	public void exportNow(BufferedWriter writer, boolean isReference) throws IOException {
 
-		writer.append(" {\r\n");
+		if(isReference == false) {
+			writer.append(" {\r\n");	
+		}	
 
 		for (int rowIndex = 4; rowIndex <= lineSheet.getLastRowNum(); rowIndex++) {
 
@@ -26,7 +30,11 @@ public class exportLine extends commonExport{
 			if(currentRow.getCell(0).toString().equalsIgnoreCase(styleID)) {
 
 				drawGeometryLines(currentRow, writer);
-				writer.append("}\r\n");
+				markerRepetition(currentRow,  writer);
+			
+				if(isReference == false) {
+					writer.append("}\r\n");
+				}
 			}
 		}	
 	}
@@ -90,6 +98,17 @@ public class exportLine extends commonExport{
 		}else {
 			writer.append("\tline-cap: round;");
 			writer.append("\r\n");
+		}
+	}
+	
+	public void markerRepetition(Row row, BufferedWriter writer) throws IOException {
+		
+		// Reference to a point style
+		if(row.getCell(8) != null && row.getCell(8).getCellType() != Cell.CELL_TYPE_BLANK) {
+			
+			String referenceID = row.getCell(8).toString();
+			exportPoint exPoint = new exportPoint(workbook, referenceID);
+			exPoint.exportNow(writer, true);
 		}
 	}
 }

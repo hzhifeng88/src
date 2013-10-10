@@ -16,7 +16,6 @@ public class validateRasterStyle extends commonValidate {
 	}
 	
 	public boolean isSheetCorrect() {
-
 		return sheetCorrect;
 	}
 	
@@ -41,8 +40,6 @@ public class validateRasterStyle extends commonValidate {
 					checkLineBreakInCells(row);
 					
 					if(hasError == false) {
-						
-						// Check valid ID and duplicate
 						int tempColumnIndex = findColumnIndex("Style ID", 1);
 						String columnLetter = columnIndexToLetter(tempColumnIndex);
 						checkIDAndDuplicate('R', columnLetter, rowIndex, tempColumnIndex);

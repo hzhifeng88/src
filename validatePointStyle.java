@@ -16,7 +16,6 @@ public class validatePointStyle extends commonValidate {
 	}
 	
 	public boolean isSheetCorrect() {
-
 		return sheetCorrect;
 	}
 
@@ -74,7 +73,6 @@ public class validatePointStyle extends commonValidate {
 						checkPencilLineCap(row, rowIndex, 13, "N");
 					}
 				}
-				
 				if(hasError == true) {
 					printValueError();
 					printPencilBasedError();

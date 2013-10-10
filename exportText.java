@@ -14,7 +14,6 @@ public class exportText extends commonExport {
 	public exportText(Workbook workbook, String geometryType, String styleID) throws IOException {
 
 		super(workbook.getSheet("Colors"));
-
 		this.geometryType = geometryType;
 		this.styleID = styleID;
 		this.textSheet = workbook.getSheet("TextStyle");
@@ -31,13 +30,10 @@ public class exportText extends commonExport {
 			if(currentRow.getCell(0).toString().equalsIgnoreCase(styleID)) {
 
 				labelingGeneral(writer, currentRow);
-
+				
 				if(geometryType.equalsIgnoreCase("P")) {
-
 					labelingToPoint(writer, currentRow);
-
 				} else if(geometryType.equalsIgnoreCase("L")){
-
 					labelingToLine(writer, currentRow);
 				}
 
@@ -116,14 +112,6 @@ public class exportText extends commonExport {
 		writer.append("\ttext-orientation: " + row.getCell(5) + ";");
 		writer.append("\r\n");
 
-		// Anchor point
-		//		String anchorPoint = row.getCell(6).toString();
-		//		String tempAnchorArray[] = anchorPoint.split(",");
-		//		writer.append("\t" + tempAnchorArray[0]  + ";");
-		//		writer.append("\r\n");
-		//		writer.append("\t" + tempAnchorArray[1]  + ";");
-		//		writer.append("\r\n");
-
 		// X,Y displacement
 		String xyDisplacement = row.getCell(7).toString();
 		String tempDisArray[] = xyDisplacement.split(",");
@@ -131,7 +119,6 @@ public class exportText extends commonExport {
 		writer.append("\r\n");
 		writer.append("\ttext-dy: " + tempDisArray[1]  + ";");
 		writer.append("\r\n");
-
 	}
 
 	public void labelingToLine(BufferedWriter writer, Row row) throws IOException {
@@ -142,13 +129,11 @@ public class exportText extends commonExport {
 			writer.append("\r\n");
 		}
 
-		// Initial Gap & Repeated Gap
+		// Repeated Gap; Initial Gap not supported
 		// Only works when text is aligned to geometry(line)
 		if(row.getCell(9) != null && row.getCell(9).getCellType() != Cell.CELL_TYPE_BLANK) {
 			String repeatedGaps = row.getCell(9).toString();
 			String tempGapArray[] = repeatedGaps.split(",");
-			//			writer.append("\t" + tempGapArray[0]  + ";");
-			//			writer.append("\r\n");
 			writer.append("\ttext-spacing: " + tempGapArray[1]  + ";");
 			writer.append("\r\n");
 		}
@@ -175,7 +160,6 @@ public class exportText extends commonExport {
 
 		// Solid color based
 		if(row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK) {
-
 			String foundColor = referenceColor(row.getCell(11).toString());
 			writer.append("\ttext-fill: " + foundColor + ";");
 			writer.append("\r\n");

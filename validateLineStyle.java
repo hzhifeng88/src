@@ -18,7 +18,6 @@ public class validateLineStyle extends commonValidate {
 	}
 	
 	public boolean isSheetCorrect() {
-
 		return sheetCorrect;
 	}
 
@@ -47,7 +46,6 @@ public class validateLineStyle extends commonValidate {
 					
 					// Check valid ID and duplicate
 					if(row.getCell(0) != null && row.getCell(0).getCellType() != Cell.CELL_TYPE_BLANK) {
-
 						int tempColumnIndex = findColumnIndex("Style ID", 1);
 						String columnLetter = columnIndexToLetter(tempColumnIndex);
 						checkIDAndDuplicate('L', columnLetter, rowIndex, tempColumnIndex);
@@ -79,7 +77,6 @@ public class validateLineStyle extends commonValidate {
 						referenceCheck(workbook, lineSheet, row, rowIndex, 8, 'P');
 					}
 				}
-
 				if(hasError == true) {
 					printValueError();
 					printPencilBasedError();
@@ -95,5 +92,4 @@ public class validateLineStyle extends commonValidate {
 			sheetCorrect = false;
 		}
 	}
-
 }

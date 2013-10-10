@@ -1,18 +1,18 @@
 import java.io.BufferedWriter;
 import java.io.IOException;
+
 import org.apache.poi.ss.usermodel.*;
 
 public class exportPolygon extends commonExport {
 
 	private String styleID;
 	private Sheet polygonSheet;
-//	private Workbook workbook;
+	private Workbook workbook;
 	
 	public exportPolygon(Workbook workbook, String styleID) throws IOException {
 
 		super(workbook.getSheet("Colors"));
-
-//		this.workbook = workbook;
+		this.workbook = workbook;
 		this.styleID = styleID;
 		this.polygonSheet = workbook.getSheet("PolygonStyle");
 	}
@@ -38,13 +38,12 @@ public class exportPolygon extends commonExport {
 
 		// Solid color based
 		if(row.getCell(2) != null && row.getCell(2).getCellType() != Cell.CELL_TYPE_BLANK) {
-			
 			String foundColor = referenceColor(row.getCell(2).toString());
 			writer.append("\tpolygon-fill: " + foundColor + ";");
 			writer.append("\r\n");
 			
 		}else {
-			writer.append("\tmarker-line-color: #000000;");
+			writer.append("\tpolygon-fill: #808080;");
 			writer.append("\r\n");
 		}
 
@@ -56,14 +55,20 @@ public class exportPolygon extends commonExport {
 			writer.append("\tpolygon-opacity: 1;");
 			writer.append("\r\n");
 		}
-
-		// Implement Pattern-based area HERE
+		
+		// Reference to a point style
+		if(row.getCell(4) != null && row.getCell(4).getCellType() != Cell.CELL_TYPE_BLANK) {
+			String referenceID = row.getCell(4).toString();
+			exportPoint exPoint = new exportPoint(workbook, referenceID);
+			exPoint.exportNow(writer, true);
+		}
 	}
 	
 	public void drawOutline(Row row, BufferedWriter writer) throws IOException {
 		
-		// Reference to a line style (is this correct?)
-//		String referenceID = row.getCell(5).toString();
-//		exportLine exLine = new exportLine(workbook, writer, referenceID);
+		// Reference to a line style
+		String referenceID = row.getCell(5).toString();
+		exportLine exLine = new exportLine(workbook, referenceID);
+		exLine.exportNow(writer, true);
 	}
 }

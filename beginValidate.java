@@ -14,7 +14,6 @@ public class beginValidate {
 	private ArrayList<String> storeColorID = new ArrayList<String>();
 	private ArrayList<String> storeExtraSheets= new ArrayList<String>();
 	private ArrayList<Boolean> storeIsSheetsCorrect= new ArrayList<Boolean>();
-
 	private validateLayers vLayers;
 	private validatePointStyle vPoint;
 	private validateLineStyle vLine;

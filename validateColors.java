@@ -24,7 +24,6 @@ public class validateColors extends commonValidate {
 	}
 
 	public boolean isSheetCorrect() {
-
 		return sheetCorrect;
 	}
 
@@ -49,7 +48,6 @@ public class validateColors extends commonValidate {
 
 					// Check valid ID and duplicate
 					if(row.getCell(0) != null && row.getCell(0).getCellType() != Cell.CELL_TYPE_BLANK) {
-
 						int tempColumnIndex = findColumnIndex("Color Id", 2);
 						String columnLetter = columnIndexToLetter(tempColumnIndex);
 						checkIDAndDuplicate('C', columnLetter, rowIndex, tempColumnIndex);
@@ -64,7 +62,6 @@ public class validateColors extends commonValidate {
 				}else {
 					printNoErrorMsg();
 					sheetCorrect = true;
-
 				}
 			}
 		}else {

@@ -18,7 +18,6 @@ public class validatePolygonStyle extends commonValidate {
 	}
 
 	public boolean isSheetCorrect() {
-
 		return sheetCorrect;
 	}
 	
@@ -71,7 +70,6 @@ public class validatePolygonStyle extends commonValidate {
 						referenceCheck(workbook, polygonSheet, row, rowIndex, 5, 'L');
 					}
 				}
-
 				if(hasError == true) {
 					printValueError();
 					printColorError();

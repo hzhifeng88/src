@@ -5,16 +5,26 @@ public class layersClassObject {
 	private String topic;
 	private String className;
 	private String rowIndex;
+	private double drawingOrder;
 	private boolean haveSame = false;
-	
-	public layersClassObject(String modelName, String topic, String className, String rowIndex) {
+
+	public layersClassObject(String modelName, String topic, String className, String rowIndex, double drawingOrder) {
 
 		this.modelName = modelName;
 		this.topic = topic;
 		this.className = className;
 		this.rowIndex = rowIndex;
+		this.drawingOrder = drawingOrder;
 	}
-	
+
+	public double getDrawingOrder() {
+		return drawingOrder;
+	}
+
+	public void setDrawingOrder(double drawingOrder) {
+		this.drawingOrder = drawingOrder;
+	}
+
 	public boolean isHaveSame() {
 		return haveSame;
 	}
@@ -30,8 +40,6 @@ public class layersClassObject {
 	public void setRowIndex(String rowIndex) {
 		this.rowIndex = rowIndex;
 	}
-
-
 
 	public String getTopic() {
 		return topic;

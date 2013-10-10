@@ -10,14 +10,15 @@ public class exportPoint extends commonExport {
 	public exportPoint(Workbook workbook, String styleID)  throws IOException {
 
 		super(workbook.getSheet("Colors"));
-
 		this.styleID = styleID;
 		this.pointSheet = workbook.getSheet("PointStyle");
 	}
 
-	public void exportNow(BufferedWriter writer) throws IOException {
+	public void exportNow(BufferedWriter writer, boolean isReference) throws IOException {
 
-		writer.append(" {\r\n");
+		if(isReference == false) {
+			writer.append(" {\r\n");	
+		}
 
 		for (int rowIndex = 4; rowIndex <= pointSheet.getLastRowNum(); rowIndex++) {
 
@@ -28,42 +29,39 @@ public class exportPoint extends commonExport {
 				drawPointSymbols(currentRow, writer);
 				drawMarkerOutlines(currentRow, writer);
 				fillUpMarkerAreas(currentRow, writer);
-				writer.append("}\r\n");
+				
+				if(isReference == false) {
+					writer.append("}\r\n");
+				}
 			}
 		}	
 	}
 
 	public void drawPointSymbols(Row row, BufferedWriter writer) throws IOException {
-
 		
 		// Size
 		if(row.getCell(1) != null && row.getCell(1).getCellType() != Cell.CELL_TYPE_BLANK) {
-
 			writer.append("\tmarker-width: " + row.getCell(1) +";");
 			writer.append("\r\n");
 		}
 		
 		// Rotation
 		if(row.getCell(2) != null && row.getCell(2).getCellType() != Cell.CELL_TYPE_BLANK) {
-
 			writer.append("\tmarker-transform: rotate(" + row.getCell(2) +",0,0);");
 			writer.append("\r\n");
 		}
 		
 		// Graphic based
 		if(row.getCell(6) != null && row.getCell(6).getCellType() != Cell.CELL_TYPE_BLANK) {
-
 			writer.append("\tmarker-file: url(" + row.getCell(6) +");");
 			writer.append("\r\n");
 		}
-
 	}
 
 	public void drawMarkerOutlines(Row row, BufferedWriter writer) throws IOException {
 
 		// Marker based color
 		if(row.getCell(7) != null && row.getCell(7).getCellType() != Cell.CELL_TYPE_BLANK) {
-
 			String foundColor = referenceColor(row.getCell(7).toString());
 			writer.append("\tmarker-line-color: " + foundColor + ";");
 			writer.append("\r\n");
