@@ -1,14 +1,15 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
-public class exportReport extends JFrame {
+public class ExportReport extends JFrame {
 	
-    public catalogMain mainWindow; 
+    public CatalogMain mainWindow; 
     private int framePosX;     
     private int framePosY;   
 	private JTextPane reportPane;
@@ -16,7 +17,7 @@ public class exportReport extends JFrame {
 	private HTMLEditorKit kit;
 	private HTMLDocument doc;
     
-	public exportReport(final catalogMain mainWindow) {
+	public ExportReport(final CatalogMain mainWindow) {
 		
 		this.mainWindow = mainWindow;       
 		setTitle("Export to CartoCSS Report");     
@@ -71,7 +72,8 @@ public class exportReport extends JFrame {
 		try {
 			kit.insertHTML(doc, doc.getLength(), "<font size = 3><font color=#0A23C4><b>** The file(s) will be exported to your Desktop </b></font color></font>", 0, 0,null);
 		}catch (BadLocationException | IOException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "An error has occurred (ExportReport-HTMLkit). Application will now terminate.");
+			System.exit(0);
 		} 
 	}
 	
@@ -81,7 +83,8 @@ public class exportReport extends JFrame {
 			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <br><font color=#0A23C4>Sheet: <font color=#ED0E3F><b><font size = 3>" + style +" </b></font color></font>", 0, 0,null);
 			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#088542>---------------------------- </font color></font>", 0, 0, null);
 		}catch (BadLocationException | IOException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "An error has occurred (ExportReport-HTMLkit). Application will now terminate.");
+			System.exit(0);
 		} 
 	}
 
@@ -90,7 +93,8 @@ public class exportReport extends JFrame {
 		try {
 			kit.insertHTML(doc, doc.getLength(), text, 0, 0,null);
 		}catch (BadLocationException | IOException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "An error has occurred (ExportReport-HTMLkit). Application will now terminate.");
+			System.exit(0);
 		} 
 	}
 }

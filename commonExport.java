@@ -1,17 +1,13 @@
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.*;
+import java.util.*;
+import org.apache.poi.ss.usermodel.*;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-
-public class commonExport {
+public class CommonExport {
 
 	private Sheet colorsSheet;
-	public static String newline = System.getProperty("line.separator");
+	public final static String NEWLINE = System.getProperty("line.separator");
 
-	public commonExport(Sheet colorSheet) {
+	public CommonExport(Sheet colorSheet) {
 
 		this.colorsSheet = colorSheet;
 	}
@@ -29,28 +25,36 @@ public class commonExport {
 		return "not found";
 	}
 
-	public void appendLayerConditions(Row row, String storeCartoCSS, BufferedWriter writer, String currentClass, ArrayList<layersClassObject> storeClassObjects) throws IOException {
+	public void appendLayerConditions(Row row, String storeCartoCSS, BufferedWriter writer, String currentClass, List<LayersClassObject> storeClassObjects) throws IOException {
+		
+		handleSameClassNames(row, storeClassObjects, writer);
+		storeCartoCSS = storeCartoCSS.concat("#"+ currentClass);
+		concatAttributeDependency(row, storeCartoCSS, currentClass);
+		concatScaleDenominator(row, storeCartoCSS);
 
-		Double tempDouble;
-
+		writer.append(storeCartoCSS);
+	}
+ 	
+	public void handleSameClassNames(Row row, List<LayersClassObject> storeClassObjects, BufferedWriter writer) throws IOException {
+		
 		// Generates comments if classes have duplicates
 		for(int classCount = 0; classCount < storeClassObjects.size(); classCount++) {
 
-			if(storeClassObjects.get(classCount).isHaveSame() == true && storeClassObjects.get(classCount).getRowIndex().equalsIgnoreCase(String.valueOf(row.getRowNum()+1))) {
+			if(storeClassObjects.get(classCount).isHaveSame() && storeClassObjects.get(classCount).getRowIndex().equalsIgnoreCase(String.valueOf(row.getRowNum()+1))) {
 				
 				if(storeClassObjects.get(classCount).getTopic() != null) {
 					writer.append("//Model: " + storeClassObjects.get(classCount).getModelName() + "  Topic: " + storeClassObjects.get(classCount).getTopic());
-					writer.append("\r\n");
+					writer.append(NEWLINE);
 				}else {
 					writer.append("//Model: " + storeClassObjects.get(classCount).getModelName());
-					writer.append("\r\n");
+					writer.append(NEWLINE);
 				}
 			}
 		}
-		
-		storeCartoCSS = storeCartoCSS.concat("#"+ currentClass);
+	}
+	
+	public void concatAttributeDependency(Row row, String storeCartoCSS, String currentClass) {
 
-		// Attribute dependency
 		if (row.getCell(5) != null && row.getCell(5).getCellType() != Cell.CELL_TYPE_BLANK) {
 
 			if(row.getCell(5).toString().contains("AND")) {
@@ -70,27 +74,29 @@ public class commonExport {
 					storeCartoCSS = storeCartoCSS.concat("["+ tempAttrDependencyArray[count].trim() + "]");
 
 					if(count < tempAttrDependencyArray.length-1) {
-						storeCartoCSS = storeCartoCSS.concat("," + newline + "#"+ currentClass);
+						storeCartoCSS = storeCartoCSS.concat("," + NEWLINE + "#"+ currentClass);
 					}
 				}
 			}else {
 				storeCartoCSS = storeCartoCSS.concat("["+ row.getCell(5).toString() + "]");
 			}
 		}
+	}
 
+	public void concatScaleDenominator(Row row, String storeCartoCSS) {
+		
 		if (row.getCell(9) != null && row.getCell(9).getCellType() != Cell.CELL_TYPE_BLANK) {
-			tempDouble = new Double(row.getCell(9).toString());
-			storeCartoCSS = storeCartoCSS.concat("[zoom>"+ (int)Math.round(tempDouble-1) + "]");
+			Double minScaleDenominator = new Double(row.getCell(9).toString());
+			storeCartoCSS = storeCartoCSS.concat("[zoom>"+ (int)Math.round(minScaleDenominator-1) + "]");
 		}
 
 		if (row.getCell(10) != null && row.getCell(10).getCellType() != Cell.CELL_TYPE_BLANK) {
-			tempDouble = new Double(row.getCell(10).toString());
-			storeCartoCSS = storeCartoCSS.concat("[zoom<"+ (int)Math.round(tempDouble+1) + "]");
+			Double maxScaleDenominator = new Double(row.getCell(10).toString());
+			storeCartoCSS = storeCartoCSS.concat("[zoom<"+ (int)Math.round(maxScaleDenominator+1) + "]");
 		}
-		writer.append(storeCartoCSS);
 	}
-
-	public void printExportReport(exportReport cartoReport, ArrayList<String> storeInvalidFont) {
+	
+	public void printExportReport(ExportReport cartoReport, List<String> storeInvalidFont) {
 
 		if(storeInvalidFont != null && storeInvalidFont.isEmpty() == false) {
 			cartoReport.writeHeader("TextStyle");

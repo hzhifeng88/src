@@ -1,17 +1,16 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import org.apache.poi.ss.usermodel.*;
 
-public class exportText extends commonExport {
+public class ExportText extends CommonExport {
 
 	private String geometryType;
 	private String styleID;
 	private Sheet textSheet;
 	private ArrayList<String> storeInvalidFont = new ArrayList<String>();
 
-	public exportText(Workbook workbook, String geometryType, String styleID) throws IOException {
+	public ExportText(Workbook workbook, String geometryType, String styleID) throws IOException {
 
 		super(workbook.getSheet("Colors"));
 		this.geometryType = geometryType;
@@ -21,7 +20,7 @@ public class exportText extends commonExport {
 
 	public ArrayList<String> exportNow(BufferedWriter writer) throws IOException {
 
-		writer.append(" {\r\n");
+		writer.append(" {" + NEWLINE);
 
 		for (int rowIndex = 4; rowIndex <= textSheet.getLastRowNum(); rowIndex++) {
 
@@ -38,7 +37,7 @@ public class exportText extends commonExport {
 				}
 
 				fillArea(writer, currentRow);
-				writer.append("}\r\n");
+				writer.append("}" + NEWLINE);
 			}
 		}
 		return storeInvalidFont;
@@ -46,19 +45,16 @@ public class exportText extends commonExport {
 
 	public boolean referenceFont(String givenFont) {
 
-		try {
+		InputStream is = ExportText.class.getResourceAsStream("Fonts");
+		
+		@SuppressWarnings("resource")
+		Scanner scanFont = new Scanner(is);
+		scanFont.useDelimiter(System.getProperty("line.separator"));
 
-			@SuppressWarnings("resource")
-			Scanner scanFont = new Scanner(new FileReader("src/CartoCSS Fonts"));
-			scanFont.useDelimiter(System.getProperty("line.separator"));
-
-			while (scanFont.hasNext()) {  
-				if(givenFont.trim().equalsIgnoreCase(scanFont.next())){
-					return true;
-				}
+		while (scanFont.hasNext()) {  
+			if(givenFont.trim().equalsIgnoreCase(scanFont.next())){
+				return true;
 			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
 		}
 		return false;
 	}
@@ -67,18 +63,18 @@ public class exportText extends commonExport {
 
 		// Label text
 		writer.append("\ttext-name: \"[" + row.getCell(1) + "]\";");
-		writer.append("\r\n");
+		writer.append(NEWLINE);
 
 		// Default font: Times new Roman Regular
 		String fontFamily = row.getCell(2).toString();
 		String tempFontArray[] = fontFamily.split(",");
 		if(referenceFont(tempFontArray[0]) == true) {
 			writer.append("\ttext-face-name: \"" + tempFontArray[0] + "\";");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 
 		}else {
 			writer.append("\ttext-face-name: \"Times New Roman Regular\";");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 			storeInvalidFont.add("C" + Integer.toString(row.getRowNum() + 1));
 		}
 
@@ -86,19 +82,19 @@ public class exportText extends commonExport {
 		String haloColorRadius = row.getCell(3).toString();
 		String tempHaloArray[] = haloColorRadius.split(",");
 		writer.append("\ttext-halo-radius: " + tempHaloArray[1] + ";");
-		writer.append("\r\n");
+		writer.append(NEWLINE);
 		String foundColor = referenceColor(tempHaloArray[0].toString());
 		writer.append("\ttext-halo-fill: " + foundColor + ";");
-		writer.append("\r\n");
+		writer.append(NEWLINE);
 
 		// Font size
 		if(row.getCell(4) != null && row.getCell(4).getCellType() != Cell.CELL_TYPE_BLANK) {
 			Double tempDouble = new Double(row.getCell(4).toString());
 			writer.append("\ttext-size: " + (int)Math.round(tempDouble) + ";");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 		}else {
 			writer.append("\ttext-size: 10;");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 		}
 	}
 
@@ -106,19 +102,19 @@ public class exportText extends commonExport {
 
 		// Placement
 		writer.append("\ttext-placement: point;");
-		writer.append("\r\n");
+		writer.append(NEWLINE);
 
 		// Rotation
 		writer.append("\ttext-orientation: " + row.getCell(5) + ";");
-		writer.append("\r\n");
+		writer.append(NEWLINE);
 
 		// X,Y displacement
 		String xyDisplacement = row.getCell(7).toString();
 		String tempDisArray[] = xyDisplacement.split(",");
 		writer.append("\ttext-dx: " + tempDisArray[0]  + ";");
-		writer.append("\r\n");
+		writer.append(NEWLINE);
 		writer.append("\ttext-dy: " + tempDisArray[1]  + ";");
-		writer.append("\r\n");
+		writer.append(NEWLINE);
 	}
 
 	public void labelingToLine(BufferedWriter writer, Row row) throws IOException {
@@ -126,7 +122,7 @@ public class exportText extends commonExport {
 		// Perpendicular offset (dy)
 		if(row.getCell(8) != null && row.getCell(8).getCellType() != Cell.CELL_TYPE_BLANK) {
 			writer.append("\ttext-dy: " + row.getCell(8)  + ";");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 		}
 
 		// Repeated Gap; Initial Gap not supported
@@ -135,7 +131,7 @@ public class exportText extends commonExport {
 			String repeatedGaps = row.getCell(9).toString();
 			String tempGapArray[] = repeatedGaps.split(",");
 			writer.append("\ttext-spacing: " + tempGapArray[1]  + ";");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 		}
 
 		// Alignment (Geometry or Horizontal)
@@ -145,14 +141,14 @@ public class exportText extends commonExport {
 
 			if(row.getCell(10).toString().equalsIgnoreCase("geometry")){
 				writer.append("\ttext-placement: line;");
-				writer.append("\r\n");
+				writer.append(NEWLINE);
 			}else if(row.getCell(10).toString().equalsIgnoreCase("horizontal")){
 				writer.append("\ttext-placement: point;");
-				writer.append("\r\n");
+				writer.append(NEWLINE);
 			}
 		}else {
 			writer.append("\ttext-placement: line;");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 		}
 	}
 
@@ -162,14 +158,14 @@ public class exportText extends commonExport {
 		if(row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK) {
 			String foundColor = referenceColor(row.getCell(11).toString());
 			writer.append("\ttext-fill: " + foundColor + ";");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 		}else {
 			writer.append("\ttext-fill: #808080;");
-			writer.append("\r\n");
+			writer.append(NEWLINE);
 		}
 
 		// Solid color opacity
 		writer.append("\ttext-opacity: " + row.getCell(12) + ";");
-		writer.append("\r\n");
+		writer.append(NEWLINE);
 	}
 }

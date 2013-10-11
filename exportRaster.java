@@ -1,3 +1,3 @@
-public class exportRaster {
+public class ExportRaster {
 
 }

@@ -1,6 +1,7 @@
 import java.io.*;
 import java.text.*;
 import java.util.*;
+import java.util.List;
 import java.awt.*;
 import java.awt.Color;
 import java.awt.event.*;
@@ -9,13 +10,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
-public class catalogMain extends JFrame {
+public class CatalogMain extends JFrame {
 
-	private static catalogMain mainWindow;
+	private static CatalogMain mainWindow;
 	private boolean countOne = false;
 	private boolean hasValidated = false;
 	private String excelFilePath;
@@ -29,24 +29,25 @@ public class catalogMain extends JFrame {
 	private JTextField pathTextField;
 	private JTextPane errorPane;
 	private JScrollPane scrollPane;
-	private ArrayList<Boolean> storeIsSheetsCorrect= new ArrayList<Boolean>();
-	private ArrayList<layersClassObject> storeClassObjects = new ArrayList<layersClassObject>();
+	private List<Boolean> storeIsSheetsCorrect= new ArrayList<Boolean>();
+	private List<LayersClassObject> storeClassObjects = new ArrayList<LayersClassObject>();
 	private HTMLEditorKit kit;
 	private HTMLDocument doc;
-	private beginValidate beginValidate;
-	private beginExport beginExport;
-	private exportReport cartoReport;
-	private layersClassObject classObjects;
+	private BeginValidate beginValidate;
+	private BeginExport beginExport;
+	private ExportReport cartoReport;
+	private LayersClassObject classObjects;
 	private Workbook workbook;
 	private Workbook originalWorkbook;
 
-	public catalogMain() {
+	public CatalogMain() {
 
 		createNorthPanel();
 		createSouthPanel();
-
+			
 		getContentPane().add(northPanel, BorderLayout.NORTH);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
+	
 	}
 
 	public static void main(String[] args) {
@@ -54,15 +55,16 @@ public class catalogMain extends JFrame {
 		try {
 			UIManager.setLookAndFeel("com.jtattoo.plaf.texture.TextureLookAndFeel");
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-UIManager). Application will now terminate.");
+			System.exit(0);
 		}
 
-		mainWindow = new catalogMain();
+		mainWindow = new CatalogMain();
 		mainWindow.setTitle("Portrayal Catalogue Validator");
 		mainWindow.setSize(530, 560);
 		mainWindow.setResizable(false);
 		mainWindow.setVisible(true);
-
+		
 		// Set to center of the screen
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int framePosX = (screenSize.width - mainWindow.getWidth()) / 2;
@@ -141,12 +143,13 @@ public class catalogMain extends JFrame {
 		try {
 			workbook = WorkbookFactory.create(new FileInputStream(excelFilePath));
 
-			if(countOne == false){
+			if(!countOne){
 				originalWorkbook = workbook;
 				countOne = true;
 			}
 		} catch (InvalidFormatException | IOException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-initializeRead). Application will now terminate.");
+			System.exit(0);
 		} 
 	}
 
@@ -162,18 +165,18 @@ public class catalogMain extends JFrame {
 
 			if((row.getCell(1) != null && row.getCell(1).getCellType() != Cell.CELL_TYPE_BLANK) && (row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK)) {
 				
-				classObjects = new layersClassObject(row.getCell(0).toString(), row.getCell(1).toString(), row.getCell(2).toString(), String.valueOf(rowIndex+1), Double.parseDouble(row.getCell(11).toString()));
+				classObjects = new LayersClassObject(row.getCell(0).toString(), row.getCell(1).toString(), row.getCell(2).toString(), String.valueOf(rowIndex+1), Double.parseDouble(row.getCell(11).toString()));
 				
 			}else if((row.getCell(1) != null && row.getCell(1).getCellType() != Cell.CELL_TYPE_BLANK) && (row.getCell(11) == null || row.getCell(11).getCellType() == Cell.CELL_TYPE_BLANK)) {
 				
-				classObjects = new layersClassObject(row.getCell(0).toString(), row.getCell(1).toString(), row.getCell(2).toString(), String.valueOf(rowIndex+1), 1);
+				classObjects = new LayersClassObject(row.getCell(0).toString(), row.getCell(1).toString(), row.getCell(2).toString(), String.valueOf(rowIndex+1), 1);
 				
 			}else if((row.getCell(1) == null || row.getCell(1).getCellType() == Cell.CELL_TYPE_BLANK) && (row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK)) {
 				
-				classObjects = new layersClassObject(row.getCell(0).toString(), null, row.getCell(2).toString(), String.valueOf(rowIndex+1), Double.parseDouble(row.getCell(11).toString()));
+				classObjects = new LayersClassObject(row.getCell(0).toString(), null, row.getCell(2).toString(), String.valueOf(rowIndex+1), Double.parseDouble(row.getCell(11).toString()));
 			}
 			else {
-				classObjects = new layersClassObject(row.getCell(0).toString(), null, row.getCell(2).toString(), String.valueOf(rowIndex+1), 1);
+				classObjects = new LayersClassObject(row.getCell(0).toString(), null, row.getCell(2).toString(), String.valueOf(rowIndex+1), 1);
 			}
 			storeClassObjects.add(classObjects);
 		}
@@ -188,7 +191,6 @@ public class catalogMain extends JFrame {
 				for(int count1 = count+1; count1 < storeClassObjects.size(); count1++) {
 					
 					if(storeClassObjects.get(count1).getClassName().equalsIgnoreCase(tempString)) {
-						
 						storeClassObjects.get(count).setHaveSame(true);
 						storeClassObjects.get(count1).setHaveSame(true);
 					}
@@ -199,32 +201,33 @@ public class catalogMain extends JFrame {
 
 	public void beginValidate() {
 
-		beginValidate = new beginValidate(workbook, originalWorkbook, kit, doc);
+		beginValidate = new BeginValidate(workbook, originalWorkbook, kit, doc);
 		storeIsSheetsCorrect = beginValidate.startValidate();
 	}
 
 	public void beginExport() {
 
+		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		createClassObject();
 		
-		beginExport = new beginExport(workbook, fileName);
+		beginExport = new BeginExport(workbook, fileName);
 		boolean isFileExist = beginExport.checkFileExist();
 
 		if(isFileExist == false) {
 			
-			ArrayList<String> storeInvalidFont = beginExport.exportNow(storeClassObjects);
-			mainWindow.setEnabled(false);   
-			cartoReport = new exportReport(mainWindow);
+			List<String> storeInvalidFont = beginExport.exportNow(storeClassObjects);
+			mainWindow.setEnabled(false);  
+			cartoReport = new ExportReport(mainWindow);
 			beginExport.printExportReport(cartoReport, storeInvalidFont);
 		}else {
 
-			int response = JOptionPane.showConfirmDialog(null, "File already exist. Overwrite? (Yes/No)", "Confirmation needed", JOptionPane.YES_NO_OPTION);
+			int response = JOptionPane.showConfirmDialog(null, "File already exist. Overwrite? (Yes/No)", "Confirmation", JOptionPane.YES_NO_OPTION);
 
 			if(response == JOptionPane.YES_OPTION)  {
 				
-				ArrayList<String> storeInvalidFont = beginExport.exportNow(storeClassObjects);
+				List<String> storeInvalidFont = beginExport.exportNow(storeClassObjects);
 				mainWindow.setEnabled(false);   
-				cartoReport = new exportReport(mainWindow);
+				cartoReport = new ExportReport(mainWindow);
 				beginExport.printExportReport(cartoReport, storeInvalidFont);
 			}else {
 				JOptionPane.showMessageDialog(null, "Export unsuccessful, file already exist!");
@@ -270,22 +273,25 @@ public class catalogMain extends JFrame {
 						DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 						Date date = new Date();
 
+						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						initializeRead();
 
 						try {
 							kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br></font color></font>", 0, 0, null);
 						} catch (IOException | BadLocationException e1) {
-							e1.printStackTrace();
+							JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-HTMLkit). Application will now terminate.");
+							System.exit(0);
 						} 
 
 						beginValidate();
+						setCursor(Cursor.getDefaultCursor());
 					} else {
 						JOptionPane.showMessageDialog(null, "Could not process selected file. Did you select the right file?");
 					}
 				}
 			} else if(e.getSource() == exportCSSButton) {
 
-				if(hasValidated == false){
+				if(!hasValidated){
 					JOptionPane.showMessageDialog(null, "Please validate the catalogue first.");
 				}else if(storeIsSheetsCorrect.contains(false)){
 					JOptionPane.showMessageDialog(null, "Please correct all errors first.");

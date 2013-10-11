@@ -1,5 +1,5 @@
 
-public class layersClassObject {
+public class LayersClassObject {
 
 	private String modelName;
 	private String topic;
@@ -8,7 +8,7 @@ public class layersClassObject {
 	private double drawingOrder;
 	private boolean haveSame = false;
 
-	public layersClassObject(String modelName, String topic, String className, String rowIndex, double drawingOrder) {
+	public LayersClassObject(String modelName, String topic, String className, String rowIndex, double drawingOrder) {
 
 		this.modelName = modelName;
 		this.topic = topic;
