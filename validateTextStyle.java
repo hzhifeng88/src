@@ -40,9 +40,9 @@ public class ValidateTextStyle extends CommonValidate {
 				checkLineBreakInCells(row);
 				checkIDAndDuplicate(row, 'T', "A", 0);
 				checkSizePositive(row, 4, "E");
-				checkOpacity(row, 12, "M");
+				checkOpacity(row, 13, "M");
 				matchHaloColor(row, 3, "D");
-				matchColor(row, 11, "L");
+				matchColor(row, 12, "L");
 				checkLabelPlacement(row, rowIndex, 0, storeTextGeometry);
 			}
 			if(hasError) {
@@ -70,16 +70,16 @@ public class ValidateTextStyle extends CommonValidate {
 
 		if(labelPlacement == 'P') {
 
-			if(((row.getCell(5) == null || row.getCell(5).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(6) == null || row.getCell(6).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(7) == null || row.getCell(7).getCellType() == Cell.CELL_TYPE_BLANK)) || ((row.getCell(8) != null && row.getCell(8).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(9) != null && row.getCell(9).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(10) != null && row.getCell(10).getCellType() != Cell.CELL_TYPE_BLANK))) {
+			if(((row.getCell(6) == null || row.getCell(6).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(7) == null || row.getCell(7).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(8) == null || row.getCell(8).getCellType() == Cell.CELL_TYPE_BLANK)) || ((row.getCell(9) != null && row.getCell(9).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(10) != null && row.getCell(10).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK))) {
 				hasError = true;
-				storeErrorMsg.add("Error! Only column F, G and H must be filled in for point label placement.");
+				storeErrorMsg.add("Error! Only column G, H and I must be filled in for point label placement.");
 				storeErrorRow.add(Integer.toString(rowIndex + 1));
 			}
 		}else if(labelPlacement == 'L') {
 
-			if(((row.getCell(5) != null && row.getCell(5).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(6) != null && row.getCell(6).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(7) != null && row.getCell(7).getCellType() != Cell.CELL_TYPE_BLANK)) || ((row.getCell(8) == null || row.getCell(8).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(9) == null || row.getCell(9).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(10) == null || row.getCell(10).getCellType() == Cell.CELL_TYPE_BLANK))) {
+			if(((row.getCell(6) != null && row.getCell(6).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(7) != null && row.getCell(7).getCellType() != Cell.CELL_TYPE_BLANK) || (row.getCell(8) != null && row.getCell(8).getCellType() != Cell.CELL_TYPE_BLANK)) || ((row.getCell(9) == null || row.getCell(9).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(10) == null || row.getCell(10).getCellType() == Cell.CELL_TYPE_BLANK) || (row.getCell(11) == null || row.getCell(11).getCellType() == Cell.CELL_TYPE_BLANK))) {
 				hasError = true;
-				storeErrorMsg.add("Error! Only column I, J and K must be filled in for line label placement.");
+				storeErrorMsg.add("Error! Only column J, K, L must be filled in for line label placement.");
 				storeErrorRow.add(Integer.toString(rowIndex + 1));
 			}
 		}

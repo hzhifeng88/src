@@ -1,8 +1,6 @@
 import java.util.*;
 import java.io.*;
-
 import javax.swing.JOptionPane;
-
 import org.apache.poi.ss.usermodel.*;
 
 public class BeginExport extends CommonExport{
@@ -14,27 +12,29 @@ public class BeginExport extends CommonExport{
 	private List<LayersClassObject> storeSortedClassObjects = new ArrayList<LayersClassObject>();
 	private final String systemFileSeparator = System.getProperty("file.separator");
 	private String fileName;
-	private String desktopPath; 
-	private String filePath; 
+	private String fileDirectory; 
 	private ExportPoint exPoint;
 	private ExportLine exLine;
 	private ExportPolygon exPolygon;
 	private ExportText exText;
 	private ExportRaster exRaster;
 
-	public BeginExport(Workbook workbook, String fileName){
+	public BeginExport(Workbook workbook, String fileName, String fileDirectory){
 
 		super(workbook.getSheet("Colors"));
 		this.workbook = workbook;
 		this.fileName = fileName;
+		this.fileDirectory = fileDirectory;
 	}
 
-	public boolean checkFileExist() {
-
-		desktopPath = System.getProperty("user.home") + systemFileSeparator + "Desktop"; 
-		filePath = desktopPath.replace("\\", systemFileSeparator); 
+	public String getSaveDirectory() {
 		
-		File file = new File(filePath + systemFileSeparator + fileName.substring(0, fileName.length()-5) +".mss");
+		return fileDirectory + systemFileSeparator + fileName.substring(0, fileName.length()-5) +".mss";
+	}
+	
+	public boolean checkFileExist() {
+		
+		File file = new File(fileDirectory + systemFileSeparator + fileName.substring(0, fileName.length()-5) +".mss");
 		return file.exists();
 	}
 
@@ -47,7 +47,7 @@ public class BeginExport extends CommonExport{
 
 		try {
 			
-			writer = new BufferedWriter(new FileWriter(filePath + systemFileSeparator + fileName.substring(0, fileName.length()-5) +".mss"));
+			writer = new BufferedWriter(new FileWriter(fileDirectory + systemFileSeparator + fileName.substring(0, fileName.length()-5) +".mss"));
 
 			for (int rowIndex = 0; rowIndex < storeSortedClassObjects.size(); rowIndex++) {
 

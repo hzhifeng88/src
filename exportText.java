@@ -45,7 +45,7 @@ public class ExportText extends CommonExport {
 
 	public boolean referenceFont(String givenFont) {
 
-		InputStream is = ExportText.class.getResourceAsStream("Fonts");
+		InputStream is = ExportText.class.getResourceAsStream("resource/Fonts");
 		
 		@SuppressWarnings("resource")
 		Scanner scanFont = new Scanner(is);
@@ -105,11 +105,11 @@ public class ExportText extends CommonExport {
 		writer.append(NEWLINE);
 
 		// Rotation
-		writer.append("\ttext-orientation: " + row.getCell(5) + ";");
+		writer.append("\ttext-orientation: " + row.getCell(6) + ";");
 		writer.append(NEWLINE);
 
 		// X,Y displacement
-		String xyDisplacement = row.getCell(7).toString();
+		String xyDisplacement = row.getCell(8).toString();
 		String tempDisArray[] = xyDisplacement.split(",");
 		writer.append("\ttext-dx: " + tempDisArray[0]  + ";");
 		writer.append(NEWLINE);
@@ -120,15 +120,15 @@ public class ExportText extends CommonExport {
 	public void labelingToLine(BufferedWriter writer, Row row) throws IOException {
 
 		// Perpendicular offset (dy)
-		if(row.getCell(8) != null && row.getCell(8).getCellType() != Cell.CELL_TYPE_BLANK) {
-			writer.append("\ttext-dy: " + row.getCell(8)  + ";");
+		if(row.getCell(9) != null && row.getCell(9).getCellType() != Cell.CELL_TYPE_BLANK) {
+			writer.append("\ttext-dy: " + row.getCell(9)  + ";");
 			writer.append(NEWLINE);
 		}
 
 		// Repeated Gap; Initial Gap not supported
 		// Only works when text is aligned to geometry(line)
-		if(row.getCell(9) != null && row.getCell(9).getCellType() != Cell.CELL_TYPE_BLANK) {
-			String repeatedGaps = row.getCell(9).toString();
+		if(row.getCell(10) != null && row.getCell(10).getCellType() != Cell.CELL_TYPE_BLANK) {
+			String repeatedGaps = row.getCell(10).toString();
 			String tempGapArray[] = repeatedGaps.split(",");
 			writer.append("\ttext-spacing: " + tempGapArray[1]  + ";");
 			writer.append(NEWLINE);
@@ -137,12 +137,12 @@ public class ExportText extends CommonExport {
 		// Alignment (Geometry or Horizontal)
 		// When line placement is specified, geometry means line,
 		// if not specified, default is Point, which is Horizontal
-		if(row.getCell(10) != null && row.getCell(10).getCellType() != Cell.CELL_TYPE_BLANK) {
+		if(row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK) {
 
-			if(row.getCell(10).toString().equalsIgnoreCase("geometry")){
+			if(row.getCell(11).toString().equalsIgnoreCase("geometry")){
 				writer.append("\ttext-placement: line;");
 				writer.append(NEWLINE);
-			}else if(row.getCell(10).toString().equalsIgnoreCase("horizontal")){
+			}else if(row.getCell(11).toString().equalsIgnoreCase("horizontal")){
 				writer.append("\ttext-placement: point;");
 				writer.append(NEWLINE);
 			}
@@ -155,8 +155,8 @@ public class ExportText extends CommonExport {
 	public void fillArea(BufferedWriter writer, Row row) throws IOException {
 
 		// Solid color based
-		if(row.getCell(11) != null && row.getCell(11).getCellType() != Cell.CELL_TYPE_BLANK) {
-			String foundColor = referenceColor(row.getCell(11).toString());
+		if(row.getCell(12) != null && row.getCell(12).getCellType() != Cell.CELL_TYPE_BLANK) {
+			String foundColor = referenceColor(row.getCell(12).toString());
 			writer.append("\ttext-fill: " + foundColor + ";");
 			writer.append(NEWLINE);
 		}else {
@@ -165,7 +165,7 @@ public class ExportText extends CommonExport {
 		}
 
 		// Solid color opacity
-		writer.append("\ttext-opacity: " + row.getCell(12) + ";");
+		writer.append("\ttext-opacity: " + row.getCell(13) + ";");
 		writer.append(NEWLINE);
 	}
 }

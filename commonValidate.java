@@ -379,17 +379,20 @@ public class CommonValidate {
 
 	public void checkClassValues(Row row) {
 
-		String getClassValues = row.getCell(2).toString();
-		String allowedChar = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
+		if(row.getCell(2) != null && row.getCell(2).getCellType() != Cell.CELL_TYPE_BLANK) {
+			
+			String getClassValues = row.getCell(2).toString();
+			String allowedChar = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
+			
+			for(int charCount = 0; charCount < getClassValues.length(); charCount++) {
 
-		for(int charCount = 0; charCount < getClassValues.length(); charCount++) {
+				char getEachChar = getClassValues.charAt(charCount);
 
-			char getEachChar = getClassValues.charAt(charCount);
-
-			if(allowedChar.indexOf(getEachChar) == -1) {
-				hasError = true;
-				storeClassValueError.add("C" + Integer.toString(row.getRowNum() + 1));
-				break;
+				if(allowedChar.indexOf(getEachChar) == -1) {
+					hasError = true;
+					storeClassValueError.add("C" + Integer.toString(row.getRowNum() + 1));
+					break;
+				}
 			}
 		}
 	}

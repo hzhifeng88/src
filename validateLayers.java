@@ -8,7 +8,7 @@ public class ValidateLayers extends CommonValidate {
 	private Workbook workbook;
 	private Sheet layersSheet;
 	private boolean sheetCorrect = false;
-	private static int[] mandatoryColumn = {0,2,3,4,6};
+	private static int[] mandatoryColumn = {0,2,4,6};
 
 	public ValidateLayers(Sheet sheet, Workbook workbook, Workbook originalWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
 

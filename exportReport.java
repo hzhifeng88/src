@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
@@ -12,18 +11,22 @@ public class ExportReport extends JFrame {
     public CatalogMain mainWindow; 
     private int framePosX;     
     private int framePosY;   
+    private String getSaveDirectory;
 	private JTextPane reportPane;
 	private JScrollPane scrollPane;
 	private HTMLEditorKit kit;
 	private HTMLDocument doc;
     
-	public ExportReport(final CatalogMain mainWindow) {
+	public ExportReport(final CatalogMain mainWindow, String getSaveDirectory) {
 		
 		this.mainWindow = mainWindow;       
+		this.getSaveDirectory = getSaveDirectory;
 		setTitle("Export to CartoCSS Report");     
-		setSize(350, 350);      
+		setSize(450, 350);      
 		setVisible(true);       
 		setResizable(false); 
+		
+		setIconImage(new ImageIcon(CatalogMain.class.getClassLoader().getResource("images/Icon.png")).getImage());
 		
 		//Set to center of the screen  
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();  
@@ -43,7 +46,7 @@ public class ExportReport extends JFrame {
 	}
 	
 	public void createPane() {
-		
+
 		reportPane = new JTextPane();
 		reportPane.setOpaque(false);
 		kit = new HTMLEditorKit();
@@ -59,9 +62,9 @@ public class ExportReport extends JFrame {
 				super.paintComponent(og);
 				Graphics2D g = (Graphics2D) og;
 				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				GradientPaint gradient = new GradientPaint(0, 0, new Color(247, 237, 204), 0, getHeight(), Color.WHITE, true);
+				GradientPaint gradient = new GradientPaint(0, 0, new Color(248, 248, 248), 0, getHeight(), Color.WHITE, true);
 				g.setPaint(gradient);
-				g.fillRoundRect(0, 0, getWidth(), getHeight(), 50, 50);
+				g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
 			}
 		};
 		viewport.add(reportPane);
@@ -70,7 +73,7 @@ public class ExportReport extends JFrame {
 		scrollPane.setViewport(viewport);
 		
 		try {
-			kit.insertHTML(doc, doc.getLength(), "<font size = 3><font color=#0A23C4><b>** The file(s) will be exported to your Desktop </b></font color></font>", 0, 0,null);
+			kit.insertHTML(doc, doc.getLength(), "<font size = 3><font color=#0A23C4><b>Export Directory: " + getSaveDirectory + "</b></font color></font>", 0, 0,null);
 		}catch (BadLocationException | IOException e) {
 			JOptionPane.showMessageDialog(null, "An error has occurred (ExportReport-HTMLkit). Application will now terminate.");
 			System.exit(0);
