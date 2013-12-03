@@ -10,20 +10,20 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
-
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
 public class CatalogMain extends JFrame {
 
-	private static CatalogMain mainWindow;
 	public final static String version = "1.1";
-	private boolean countOne = false;
+	public final static String templateFile = "Portrayal_Catalogue_TEMPLATE_v1.2_EN.xlsx";
+	private static CatalogMain mainWindow;
 	private boolean hasValidated = false;
 	private String excelFilePath;
 	private String fileDirectory;
 	private String fileName;
-	private String oldExcelFilePath = "";
+	private String templateVersion = templateFile.substring(29,36);
+	private String catalogueVersion;
 	private JFileChooser chooser;
 	private JPanel northPanel;
 	private JButton openFileButton;
@@ -46,13 +46,14 @@ public class CatalogMain extends JFrame {
 	private ExportReport cartoReport;
 	private LayersClassObject classObjects;
 	private Workbook workbook;
-	private Workbook originalWorkbook;
+	private Workbook templateWorkbook;
 	private Properties prop = new Properties();
 
 	public CatalogMain() {
 
 		createNorthPanel();
 		createSouthPanel();
+		loadDefaultTemplate();
 
 		getContentPane().add(northPanel, BorderLayout.NORTH);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -60,60 +61,24 @@ public class CatalogMain extends JFrame {
 
 	public static void main(String[] args) {
 
-		if(checkArgument(args)) {
-			
-			setLookAndFeel();
+		setLookAndFeel();
 
-			mainWindow = new CatalogMain();
-			mainWindow.setTitle("Portrayal Catalogue Valdiator " + version);
-			mainWindow.setSize(530, 560);
-			mainWindow.setResizable(false);
-			mainWindow.setVisible(true);
+		mainWindow = new CatalogMain();
+		mainWindow.setTitle("Portrayal Catalogue Valdiator " + version + "   |   " + templateFile.substring(20,36));
+		mainWindow.setSize(530, 560);
+		mainWindow.setResizable(false);
+		mainWindow.setVisible(true);
 
-			mainWindow.setIconImage(new ImageIcon(CatalogMain.class.getClassLoader().getResource("images/Icon.png")).getImage());
+		mainWindow.setIconImage(new ImageIcon(CatalogMain.class.getClassLoader().getResource("images/Icon.png")).getImage());
 
-			// Set to center of the screen
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			int framePosX = (screenSize.width - mainWindow.getWidth()) / 2;
-			int framePosY = (screenSize.height - mainWindow.getHeight()) / 2;
-			mainWindow.setLocation(framePosX, framePosY);
+		// Set to center of the screen
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int framePosX = (screenSize.width - mainWindow.getWidth()) / 2;
+		int framePosY = (screenSize.height - mainWindow.getHeight()) / 2;
+		mainWindow.setLocation(framePosX, framePosY);
 
-			mainWindow.getContentPane();
-			mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		}
-	}
-
-	public static boolean checkArgument(String[] args) {
-
-		if(args.length == 0) {
-			System.out.println("Default Language: English");
-		}else if(args.length == 1) {
-
-			String argument = args[0];
-
-			switch(argument) {
-
-			case "-e":
-			case "E":System.out.println("Chosen Language: English");
-			return true;
-
-			case "-g":
-			case "G":System.out.println("Chosen Language: German");
-			return true;
-
-			case "-f":
-			case "F":System.out.println("Chosen Language: French");
-			return true;
-
-			default:
-				System.out.println("Invalid arguments. -e: English, -g: German, -f: French");
-				return false;
-			}
-		}else {
-			System.out.println("Invalid arguments. Only one argument is allowed.");
-			return false;
-		}
-		return true;
+		mainWindow.getContentPane();
+		mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 	public static Properties getLAFProps() {
@@ -209,7 +174,6 @@ public class CatalogMain extends JFrame {
 		aboutFrame.setSize(370, 460);      
 		aboutFrame.setVisible(true);       
 		aboutFrame.setResizable(false); 
-
 		aboutFrame.setIconImage(new ImageIcon(CatalogMain.class.getClassLoader().getResource("images/Icon.png")).getImage());
 
 		// Set to center of the screen
@@ -271,15 +235,32 @@ public class CatalogMain extends JFrame {
 		workbook = null;
 		try {
 			workbook = WorkbookFactory.create(new FileInputStream(excelFilePath));
-
-			if(!countOne){
-				originalWorkbook = workbook;
-				countOne = true;
-			}
 		} catch (InvalidFormatException | IOException e) {
 			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-initializeRead). Application will now terminate.");
 			System.exit(0);
 		} 
+	}
+
+	public void loadDefaultTemplate() {
+
+		templateWorkbook = null;
+
+		try {
+			InputStream input = CatalogMain.class.getClassLoader().getResourceAsStream("resource/" + templateFile);
+			templateWorkbook = WorkbookFactory.create(input);
+		} catch (InvalidFormatException | IOException e) {
+			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-loadDefaultTemplate). Application will now terminate.");
+			System.exit(0);
+		} 
+	}
+	
+	public boolean checkCorrectVersionAndLanguage() {
+		
+		if(!catalogueVersion.equalsIgnoreCase(templateVersion)) {
+			JOptionPane.showMessageDialog(null, "Selected catalogue is incompatible with template.");
+			return false;
+		}
+		return true;
 	}
 
 	public void createClassObject() {
@@ -363,7 +344,7 @@ public class CatalogMain extends JFrame {
 
 	public void beginValidate() {
 
-		beginValidate = new BeginValidate(workbook, originalWorkbook, kit, doc);
+		beginValidate = new BeginValidate(workbook, templateWorkbook, kit, doc);
 		storeIsSheetsCorrect = beginValidate.startValidate();
 	}
 
@@ -413,9 +394,6 @@ public class CatalogMain extends JFrame {
 					fileDirectory = chooser.getCurrentDirectory().toString();
 					fileName = chooser.getSelectedFile().getName();
 
-					if(!oldExcelFilePath.equalsIgnoreCase(excelFilePath)) {
-						countOne = false;
-					}
 					pathTextField.setText(excelFilePath);
 				}	
 
@@ -430,9 +408,9 @@ public class CatalogMain extends JFrame {
 				} else {
 
 					setUserPropertise();
-					oldExcelFilePath = excelFilePath;
 					hasValidated =  true;
 					String tempString = excelFilePath.substring(excelFilePath.length() - 5, excelFilePath.length());
+					catalogueVersion = fileName.substring(28,35);
 
 					if (tempString.equalsIgnoreCase(".xlsx")) {
 
@@ -441,17 +419,22 @@ public class CatalogMain extends JFrame {
 
 						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-						initializeRead();
+						if(checkCorrectVersionAndLanguage()) {
+							
+							initializeRead();
+							
+							try {
+								kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Loaded catalogue version: <font color=#088542>" + catalogueVersion + "</font color></font>", 0, 0, null);
+								kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br><br></font color></font>", 0, 0, null);
+							} catch (IOException | BadLocationException e1) {
+								JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-HTMLkit). Application will now terminate.");
+								System.exit(0);
+							} 
 
-						try {
-							kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br></font color></font>", 0, 0, null);
-						} catch (IOException | BadLocationException e1) {
-							JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-HTMLkit). Application will now terminate.");
-							System.exit(0);
-						} 
-
-						beginValidate();
-						setCursor(Cursor.getDefaultCursor());
+							beginValidate();
+							setCursor(Cursor.getDefaultCursor());
+						}
+						
 					} else {
 						JOptionPane.showMessageDialog(null, "Could not process selected file. Did you select the right file?");
 					}

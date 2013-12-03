@@ -15,7 +15,7 @@ public class CommonValidate {
 	private HTMLEditorKit kit;
 	private HTMLDocument doc;
 	private Sheet sheet;
-	private Workbook originalWorkbook;
+	private Workbook templateWorkbook;
 	private List<String> storeColorID = new ArrayList<String>();					//for cross referencing
 	private List<String> storeModifiedHeaderCells = new ArrayList<String>();
 	private List<String> storeMergedCells = new ArrayList<String>();
@@ -36,10 +36,10 @@ public class CommonValidate {
 	private List<String> storeOpacityError = new ArrayList<String>();
 	private List<String> storeClassValueError = new ArrayList<String>();
 
-	public CommonValidate(Sheet sheet, Workbook originalWorkbook, List<String> colorList, HTMLEditorKit kit, HTMLDocument doc){
+	public CommonValidate(Sheet sheet, Workbook templateWorkbook, List<String> colorList, HTMLEditorKit kit, HTMLDocument doc){
 
 		this.sheet = sheet;	
-		this.originalWorkbook = originalWorkbook;
+		this.templateWorkbook = templateWorkbook;
 		this.kit = kit;
 		this.doc = doc;
 		storeColorID = colorList;
@@ -84,25 +84,25 @@ public class CommonValidate {
 
 	public void checkModifiedHeader() {
 
-		Sheet originalSheet = originalWorkbook.getSheet(sheet.getSheetName());
+		Sheet templateSheet = templateWorkbook.getSheet(sheet.getSheetName());
 
 		for(int rowIndex = 0; rowIndex < 4; rowIndex++){
 
 			Row row = sheet.getRow(rowIndex);
-			Row originalRow = originalSheet.getRow(rowIndex);
+			Row templateRow = templateSheet.getRow(rowIndex);
 
 			for(int columnIndex = 0; columnIndex < row.getLastCellNum(); columnIndex++){
 
-				if(row.getCell(columnIndex) == null && originalRow.getCell(columnIndex) == null){
+				if(row.getCell(columnIndex) == null && templateRow.getCell(columnIndex) == null){
 					continue;
 				}
 
-				if(row.getCell(columnIndex) != null && originalRow.getCell(columnIndex) == null){
+				if(row.getCell(columnIndex) != null && templateRow.getCell(columnIndex) == null){
 					storeModifiedHeaderCells.add(columnIndexToLetter(columnIndex) + Integer.toString(rowIndex + 1));
 					continue;
 				}
 
-				if(row.getCell(columnIndex).toString().equalsIgnoreCase(originalRow.getCell(columnIndex).toString())){
+				if(row.getCell(columnIndex).toString().equalsIgnoreCase(templateRow.getCell(columnIndex).toString())){
 					continue;
 				}else {
 					hasError = true;

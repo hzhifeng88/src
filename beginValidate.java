@@ -11,7 +11,7 @@ import org.apache.poi.ss.usermodel.*;
 public class BeginValidate {
 
 	private Workbook workbook;
-	private Workbook originalWorkbook;
+	private Workbook templateWorkbook;
 	private HTMLEditorKit kit;
 	private HTMLDocument doc;
 	private List<String> storeColorID = new ArrayList<String>();
@@ -25,10 +25,10 @@ public class BeginValidate {
 	private ValidateRasterStyle vRaster;
 	private ValidateColors vColors;
 
-	public BeginValidate(Workbook workbook, Workbook originalWorkbook, HTMLEditorKit kit, HTMLDocument doc){
+	public BeginValidate(Workbook workbook, Workbook templateWorkbook, HTMLEditorKit kit, HTMLDocument doc){
 
 		this.workbook = workbook;	
-		this.originalWorkbook = originalWorkbook;
+		this.templateWorkbook = templateWorkbook;
 		this.kit = kit;
 		this.doc = doc;
 	}
@@ -38,31 +38,31 @@ public class BeginValidate {
 		checkExtraSheets();
 		readColorsSheet();
 
-		vLayers = new ValidateLayers(workbook.getSheetAt(0), workbook, originalWorkbook, storeColorID, kit, doc);
+		vLayers = new ValidateLayers(workbook.getSheetAt(0), workbook, templateWorkbook, storeColorID, kit, doc);
 		List<String> storeTextGeometry = vLayers.validateSheet();
 		storeIsSheetsCorrect.add(vLayers.isSheetCorrect());
 		
-		vPoint = new ValidatePointStyle(workbook.getSheetAt(1), originalWorkbook, storeColorID, kit, doc);
+		vPoint = new ValidatePointStyle(workbook.getSheetAt(1), templateWorkbook, storeColorID, kit, doc);
 		vPoint.validateSheet();
 		storeIsSheetsCorrect.add(vPoint.isSheetCorrect());
 
-		vLine = new ValidateLineStyle(workbook.getSheetAt(2), workbook, originalWorkbook, storeColorID, kit, doc);
+		vLine = new ValidateLineStyle(workbook.getSheetAt(2), workbook, templateWorkbook, storeColorID, kit, doc);
 		vLine.validateSheet();
 		storeIsSheetsCorrect.add(vLine.isSheetCorrect());
 
-		vPolygon = new ValidatePolygonStyle(workbook.getSheetAt(3), workbook, originalWorkbook, storeColorID, kit, doc);
+		vPolygon = new ValidatePolygonStyle(workbook.getSheetAt(3), workbook, templateWorkbook, storeColorID, kit, doc);
 		vPolygon.validateSheet();
 		storeIsSheetsCorrect.add(vPolygon.isSheetCorrect());
 
-		vText = new ValidateTextStyle(workbook.getSheetAt(4), originalWorkbook, storeColorID, kit, doc);
+		vText = new ValidateTextStyle(workbook.getSheetAt(4), templateWorkbook, storeColorID, kit, doc);
 		vText.validateSheet(storeTextGeometry);
 		storeIsSheetsCorrect.add(vText.isSheetCorrect());
 
-		vRaster = new ValidateRasterStyle(workbook.getSheetAt(5), originalWorkbook, storeColorID, kit, doc);
+		vRaster = new ValidateRasterStyle(workbook.getSheetAt(5), templateWorkbook, storeColorID, kit, doc);
 		vRaster.validateSheet();
 		storeIsSheetsCorrect.add(vRaster.isSheetCorrect());
 
-		vColors = new ValidateColors(workbook.getSheetAt(6), originalWorkbook, storeColorID, kit, doc);
+		vColors = new ValidateColors(workbook.getSheetAt(6), templateWorkbook, storeColorID, kit, doc);
 		vColors.validateSheet();
 		storeIsSheetsCorrect.add(vColors.isSheetCorrect());
 		

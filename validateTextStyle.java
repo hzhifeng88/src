@@ -11,9 +11,9 @@ public class ValidateTextStyle extends CommonValidate {
 	private List<String> storeErrorRow = new ArrayList<String>();
 	private List<String> storeErrorMsg = new ArrayList<String>();
 
-	public ValidateTextStyle(Sheet sheet, Workbook originalWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
+	public ValidateTextStyle(Sheet sheet, Workbook templateWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
 
-		super(sheet, originalWorkbook, colorList, kit, doc);
+		super(sheet, templateWorkbook, colorList, kit, doc);
 		this.textSheet = sheet;
 	}
 

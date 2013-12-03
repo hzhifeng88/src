@@ -10,9 +10,9 @@ public class ValidateLineStyle extends CommonValidate {
 	private boolean sheetCorrect = false;
 	private static int[] mandatoryColumn = {0};
 
-	public ValidateLineStyle(Sheet sheet, Workbook workbook, Workbook originalWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
+	public ValidateLineStyle(Sheet sheet, Workbook workbook, Workbook templateWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
 
-		super(sheet, originalWorkbook, colorList, kit, doc);
+		super(sheet, templateWorkbook, colorList, kit, doc);
 		this.lineSheet = sheet;
 		this.workbook = workbook;
 	}

@@ -18,9 +18,9 @@ public class ValidateColors extends CommonValidate {
 	private List<String> storeInvalidColorRGB = new ArrayList<String>();
 	private static int[] mandatoryColumn = {0,1};
 
-	public ValidateColors(Sheet sheet, Workbook originalWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
+	public ValidateColors(Sheet sheet, Workbook templateWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
 
-		super(sheet, originalWorkbook, colorList, kit, doc);
+		super(sheet, templateWorkbook, colorList, kit, doc);
 		this.colorsSheet = sheet;
 		this.kit = kit;
 		this.doc = doc;

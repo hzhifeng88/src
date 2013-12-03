@@ -9,9 +9,9 @@ public class ValidatePointStyle extends CommonValidate {
 	private boolean sheetCorrect = false;
 	private static int[] mandatoryColumn = {0,1,2};
 
-	public ValidatePointStyle(Sheet sheet, Workbook originalWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
+	public ValidatePointStyle(Sheet sheet, Workbook templateWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
 
-		super(sheet, originalWorkbook, colorList, kit, doc);
+		super(sheet, templateWorkbook, colorList, kit, doc);
 		this.pointSheet = sheet;
 	}
 
