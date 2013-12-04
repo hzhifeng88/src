@@ -23,7 +23,7 @@ public class CatalogMain extends JFrame {
 	 * */
 	public final static String validatorVersion = "1.1";
 	public final static String templateFile = "Portrayal_Catalogue_TEMPLATE_v1.2";
-	
+
 	private static CatalogMain mainWindow;
 	private boolean hasValidated = false;
 	private String excelFilePath;
@@ -74,7 +74,7 @@ public class CatalogMain extends JFrame {
 		setLookAndFeel();
 
 		mainWindow = new CatalogMain();
-		mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " + templateFile.substring(20,33) + "_EN");
+		mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " + templateFile.substring(20,33) + "en");
 		mainWindow.setSize(530, 560);
 		mainWindow.setResizable(false);
 		mainWindow.setVisible(true);
@@ -268,19 +268,19 @@ public class CatalogMain extends JFrame {
 			switch(language) {
 
 			case "English":
-				tempLang = "_EN.xlsx";
+				tempLang = "en.xlsx";
 				break;
 			case "German":
-				tempLang = "_DE.xlsx";
+				tempLang = "de.xlsx";
 				break;
 			case "French":
-				tempLang = "_FR.xlsx";
+				tempLang = "fr.xlsx";
 				break;
 			default:
 				JOptionPane.showMessageDialog(null, "Invalid language.");
 			}
 
-			templateVersion = templateFile.substring(29,33) + tempLang.substring(0,3);
+			templateVersion = templateFile.substring(29,33) + tempLang.substring(0,2);
 			input = CatalogMain.class.getClassLoader().getResourceAsStream("resource/" + templateFile + tempLang);
 			templateWorkbook = WorkbookFactory.create(input);
 
@@ -288,6 +288,14 @@ public class CatalogMain extends JFrame {
 			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-loadTemplate). Application will now terminate.");
 			System.exit(0);
 		} 
+	}
+
+	public String getCatalogueCellA1() {
+
+		Sheet layersSheet = workbook.getSheet("Layers");
+		Row firstRow = layersSheet.getRow(0);
+
+		return firstRow.getCell(0).toString();
 	}
 
 	public boolean checkCorrectVersionAndLanguage() {
@@ -446,19 +454,19 @@ public class CatalogMain extends JFrame {
 					setUserPropertise();
 					hasValidated =  true;
 					String tempString = excelFilePath.substring(excelFilePath.length() - 5, excelFilePath.length());
-					catalogueVersion = fileName.substring(28,35);
 
 					if (tempString.equalsIgnoreCase(".xlsx")) {
 
-						DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-						Date date = new Date();
-
-						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
+						initializeRead();
+						catalogueVersion = getCatalogueCellA1();
+						
 						if(checkCorrectVersionAndLanguage()) {
+							
+							DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+							Date date = new Date();
 
-							initializeRead();
-
+							setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+							
 							try {
 								kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Loaded catalogue version: <font color=#088542>" + catalogueVersion + "</font color></font>", 0, 0, null);
 								kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br><br></font color></font>", 0, 0, null);
@@ -470,7 +478,6 @@ public class CatalogMain extends JFrame {
 							beginValidate();
 							setCursor(Cursor.getDefaultCursor());
 						}
-
 					} else {
 						JOptionPane.showMessageDialog(null, "Could not process selected file. Did you select the right file?");
 					}
@@ -493,7 +500,7 @@ public class CatalogMain extends JFrame {
 
 				selectedLanguage = languageBox.getSelectedItem().toString().trim();
 				loadTemplate(selectedLanguage);
-				mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " +  templateFile.substring(20,33) + tempLang.substring(0,3));
+				mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " +  templateFile.substring(20,33) + tempLang.substring(0,2));
 			}
 		}
 	}
