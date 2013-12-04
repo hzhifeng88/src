@@ -5,26 +5,36 @@ import java.util.List;
 import java.awt.*;
 import java.awt.Color;
 import java.awt.event.*;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
 public class CatalogMain extends JFrame {
 
-	public final static String version = "1.1";
-	public final static String templateFile = "Portrayal_Catalogue_TEMPLATE_v1.2_EN.xlsx";
+	/* Updating the version:
+	 * validatorVersion - version of the tool 
+	 * templateFile - version of the TEMPLATE
+	 * */
+	public final static String validatorVersion = "1.1";
+	public final static String templateFile = "Portrayal_Catalogue_TEMPLATE_v1.2";
+	
 	private static CatalogMain mainWindow;
 	private boolean hasValidated = false;
 	private String excelFilePath;
 	private String fileDirectory;
 	private String fileName;
-	private String templateVersion = templateFile.substring(29,36);
+	private String templateVersion;
 	private String catalogueVersion;
+	private String selectedLanguage;
+	private String tempLang;
 	private JFileChooser chooser;
+	private JComboBox<String> languageBox;
 	private JPanel northPanel;
 	private JButton openFileButton;
 	private JButton validateButton;
@@ -53,7 +63,7 @@ public class CatalogMain extends JFrame {
 
 		createNorthPanel();
 		createSouthPanel();
-		loadDefaultTemplate();
+		loadTemplate("English");
 
 		getContentPane().add(northPanel, BorderLayout.NORTH);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -64,7 +74,7 @@ public class CatalogMain extends JFrame {
 		setLookAndFeel();
 
 		mainWindow = new CatalogMain();
-		mainWindow.setTitle("Portrayal Catalogue Valdiator " + version + "   |   " + templateFile.substring(20,36));
+		mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " + templateFile.substring(20,33) + "_EN");
 		mainWindow.setSize(530, 560);
 		mainWindow.setResizable(false);
 		mainWindow.setVisible(true);
@@ -122,12 +132,18 @@ public class CatalogMain extends JFrame {
 		exportCSSButton = new JButton(" Export to CartoCSS ");
 		exportCSSButton.addActionListener(new ButtonHandler());
 
+		String languages[] = {" English ", " German ", " French "};
+		languageBox = new JComboBox<String>(languages);
+		languageBox.setSelectedIndex(0);
+		languageBox.addActionListener(new ButtonHandler());
+
 		northPanel.add(pathTextField);
 		northPanel.add(openFileButton);
 		northPanel.add(validateButton);
 		northPanel.add(exitButton);
 		northPanel.add(aboutButton);
 		northPanel.add(exportCSSButton);
+		northPanel.add(languageBox);
 
 		getProperty();
 
@@ -192,7 +208,7 @@ public class CatalogMain extends JFrame {
 
 		try {
 			kit1.insertHTML(doc1, doc1.getLength(), "<font size = 2><b>VERSION</font>", 0, 0,null);
-			kit1.insertHTML(doc1, doc1.getLength(), "<font size = 2>" + version + "</font>", 0, 0,null);
+			kit1.insertHTML(doc1, doc1.getLength(), "<font size = 2>" + validatorVersion + "</font>", 0, 0,null);
 			kit1.insertHTML(doc1, doc1.getLength(), "<font size = 2><b><br>MORE INFORMATION</font>", 0, 0,null);
 			kit1.insertHTML(doc1, doc1.getLength(), "<font size = 2>Website: http://wiki.hsr.ch/StefanKeller/PortrayalCatalogueValidator</font>", 0, 0,null);
 			kit1.insertHTML(doc1, doc1.getLength(), "<font size = 2>Feedback: sfkeller@hsr.ch</font>", 0, 0,null);
@@ -241,21 +257,41 @@ public class CatalogMain extends JFrame {
 		} 
 	}
 
-	public void loadDefaultTemplate() {
+	public void loadTemplate(String language) {
 
 		templateWorkbook = null;
+		InputStream input = null;
+		tempLang = null;
 
 		try {
-			InputStream input = CatalogMain.class.getClassLoader().getResourceAsStream("resource/" + templateFile);
+
+			switch(language) {
+
+			case "English":
+				tempLang = "_EN.xlsx";
+				break;
+			case "German":
+				tempLang = "_DE.xlsx";
+				break;
+			case "French":
+				tempLang = "_FR.xlsx";
+				break;
+			default:
+				JOptionPane.showMessageDialog(null, "Invalid language.");
+			}
+
+			templateVersion = templateFile.substring(29,33) + tempLang.substring(0,3);
+			input = CatalogMain.class.getClassLoader().getResourceAsStream("resource/" + templateFile + tempLang);
 			templateWorkbook = WorkbookFactory.create(input);
+
 		} catch (InvalidFormatException | IOException e) {
-			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-loadDefaultTemplate). Application will now terminate.");
+			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-loadTemplate). Application will now terminate.");
 			System.exit(0);
 		} 
 	}
-	
+
 	public boolean checkCorrectVersionAndLanguage() {
-		
+
 		if(!catalogueVersion.equalsIgnoreCase(templateVersion)) {
 			JOptionPane.showMessageDialog(null, "Selected catalogue is incompatible with template.");
 			return false;
@@ -420,9 +456,9 @@ public class CatalogMain extends JFrame {
 						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 						if(checkCorrectVersionAndLanguage()) {
-							
+
 							initializeRead();
-							
+
 							try {
 								kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Loaded catalogue version: <font color=#088542>" + catalogueVersion + "</font color></font>", 0, 0, null);
 								kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br><br></font color></font>", 0, 0, null);
@@ -434,7 +470,7 @@ public class CatalogMain extends JFrame {
 							beginValidate();
 							setCursor(Cursor.getDefaultCursor());
 						}
-						
+
 					} else {
 						JOptionPane.showMessageDialog(null, "Could not process selected file. Did you select the right file?");
 					}
@@ -453,6 +489,11 @@ public class CatalogMain extends JFrame {
 				}else {
 					beginExport();
 				}
+			}else if(e.getSource() == languageBox) {
+
+				selectedLanguage = languageBox.getSelectedItem().toString().trim();
+				loadTemplate(selectedLanguage);
+				mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " +  templateFile.substring(20,33) + tempLang.substring(0,3));
 			}
 		}
 	}
