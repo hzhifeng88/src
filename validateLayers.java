@@ -1,6 +1,4 @@
 import java.util.*;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import org.apache.poi.ss.usermodel.*;
 
 public class ValidateLayers extends CommonValidate {
@@ -10,9 +8,9 @@ public class ValidateLayers extends CommonValidate {
 	private boolean sheetCorrect = false;
 	private static int[] mandatoryColumn = {0,2,4,6};
 
-	public ValidateLayers(Sheet sheet, Workbook workbook, Workbook templateWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
+	public ValidateLayers(Sheet sheet, Workbook workbook, Workbook templateWorkbook, List<String> colorList, String validateMessage) {
 
-		super(sheet, templateWorkbook, colorList, kit, doc);
+		super(sheet, templateWorkbook, colorList, validateMessage);
 		this.layersSheet = sheet;
 		this.workbook = workbook;
 	}
@@ -21,6 +19,10 @@ public class ValidateLayers extends CommonValidate {
 		return sheetCorrect;
 	}
 
+	public String getMessage() {
+		return validateMessage;
+	}
+	
 	public List<String> validateSheet() {
 
 		if(hasFormatErrors()) {

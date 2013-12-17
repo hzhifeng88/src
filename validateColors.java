@@ -1,35 +1,28 @@
-import java.io.IOException;
 import java.util.*;
-
-import javax.swing.JOptionPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
-
 import org.apache.poi.ss.usermodel.*;
 
 public class ValidateColors extends CommonValidate {
 
-	private HTMLEditorKit kit;
-	private HTMLDocument doc;
 	private Sheet colorsSheet;
 	private boolean sheetCorrect = false;
 	private static String hexadecimal = "0123456789abcdefABCDEF";
 	private List<String> storeInvalidColorRGB = new ArrayList<String>();
 	private static int[] mandatoryColumn = {0,1};
 
-	public ValidateColors(Sheet sheet, Workbook templateWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
+	public ValidateColors(Sheet sheet, Workbook templateWorkbook, List<String> colorList, String validateMessage) {
 
-		super(sheet, templateWorkbook, colorList, kit, doc);
+		super(sheet, templateWorkbook, colorList, validateMessage);
 		this.colorsSheet = sheet;
-		this.kit = kit;
-		this.doc = doc;
 	}
 
 	public boolean isSheetCorrect() {
 		return sheetCorrect;
 	}
 
+	public String getMessage() {
+		return validateMessage;
+	}
+	
 	public void validateSheet() {
 
 		if(hasFormatErrors()) {
@@ -100,16 +93,10 @@ public class ValidateColors extends CommonValidate {
 	}
 
 	public void printRGBError(){
-
-		try {
-
-			if (!storeInvalidColorRGB.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> sRGB is invalid (Rule 1: Begins with '#', Rule 2: 6 hexadecimal representation)</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeInvalidColorRGB + "</font color></font>", 0, 0, null);
-			}
-		} catch (BadLocationException | IOException e) {
-			JOptionPane.showMessageDialog(null, "An error has occurred (ValidateColors-HTMLkit). Application will now terminate.");
-			System.exit(0);
+		
+		if (!storeInvalidColorRGB.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> sRGB is invalid (Rule 1: Begins with '#', Rule 2: 6 hexadecimal representation)<br></font color></font");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeInvalidColorRGB + "<br></font color></font>");
 		}
 	}
 }

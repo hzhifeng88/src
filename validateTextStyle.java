@@ -1,6 +1,4 @@
 import java.util.*;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import org.apache.poi.ss.usermodel.*;
 
 public class ValidateTextStyle extends CommonValidate {
@@ -11,9 +9,9 @@ public class ValidateTextStyle extends CommonValidate {
 	private List<String> storeErrorRow = new ArrayList<String>();
 	private List<String> storeErrorMsg = new ArrayList<String>();
 
-	public ValidateTextStyle(Sheet sheet, Workbook templateWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
+	public ValidateTextStyle(Sheet sheet, Workbook templateWorkbook, List<String> colorList, String validateMessage) {
 
-		super(sheet, templateWorkbook, colorList, kit, doc);
+		super(sheet, templateWorkbook, colorList, validateMessage);
 		this.textSheet = sheet;
 	}
 
@@ -21,6 +19,10 @@ public class ValidateTextStyle extends CommonValidate {
 		return sheetCorrect;
 	}
 
+	public String getMessage() {
+		return validateMessage;
+	}
+	
 	public void validateSheet(List<String> storeTextGeometry) {
 
 		if(hasFormatErrors()) {

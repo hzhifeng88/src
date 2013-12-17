@@ -1,6 +1,4 @@
 import java.util.*;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import org.apache.poi.ss.usermodel.*;
 
 public class ValidatePointStyle extends CommonValidate {
@@ -9,9 +7,9 @@ public class ValidatePointStyle extends CommonValidate {
 	private boolean sheetCorrect = false;
 	private static int[] mandatoryColumn = {0,1,2};
 
-	public ValidatePointStyle(Sheet sheet, Workbook templateWorkbook, List<String> colorList ,  HTMLEditorKit kit, HTMLDocument doc) {
+	public ValidatePointStyle(Sheet sheet, Workbook templateWorkbook, List<String> colorList, String validateMessage) {
 
-		super(sheet, templateWorkbook, colorList, kit, doc);
+		super(sheet, templateWorkbook, colorList, validateMessage);
 		this.pointSheet = sheet;
 	}
 
@@ -19,6 +17,10 @@ public class ValidatePointStyle extends CommonValidate {
 		return sheetCorrect;
 	}
 
+	public String getMessage() {
+		return validateMessage;
+	}
+	
 	public void validateSheet() {
 
 		if(hasFormatErrors()) {

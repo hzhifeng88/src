@@ -1,19 +1,11 @@
-import java.io.IOException;
 import java.util.*;
-
-import javax.swing.JOptionPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
-
 import org.apache.poi.ss.usermodel.*;
 
 public class CommonValidate {
 
 	private char idAlphabet;
 	public boolean hasError = false;
-	private HTMLEditorKit kit;
-	private HTMLDocument doc;
+	public String validateMessage;
 	private Sheet sheet;
 	private Workbook templateWorkbook;
 	private List<String> storeColorID = new ArrayList<String>();					//for cross referencing
@@ -36,12 +28,11 @@ public class CommonValidate {
 	private List<String> storeOpacityError = new ArrayList<String>();
 	private List<String> storeClassValueError = new ArrayList<String>();
 
-	public CommonValidate(Sheet sheet, Workbook templateWorkbook, List<String> colorList, HTMLEditorKit kit, HTMLDocument doc){
+	public CommonValidate(Sheet sheet, Workbook templateWorkbook, List<String> colorList, String validateMessage){
 
 		this.sheet = sheet;	
 		this.templateWorkbook = templateWorkbook;
-		this.kit = kit;
-		this.doc = doc;
+		this.validateMessage = validateMessage;
 		storeColorID = colorList;
 	}
 
@@ -132,7 +123,6 @@ public class CommonValidate {
 				if (Character.isDigit(checkChar)) {
 					cellNumber = cellNumber.concat(String.valueOf(checkChar));
 				}
-
 			}
 
 			// Begin check from row 5 onwards
@@ -380,10 +370,10 @@ public class CommonValidate {
 	public void checkClassValues(Row row) {
 
 		if(row.getCell(2) != null && row.getCell(2).getCellType() != Cell.CELL_TYPE_BLANK) {
-			
+
 			String getClassValues = row.getCell(2).toString();
 			String allowedChar = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
-			
+
 			for(int charCount = 0; charCount < getClassValues.length(); charCount++) {
 
 				char getEachChar = getClassValues.charAt(charCount);
@@ -399,118 +389,104 @@ public class CommonValidate {
 
 	public boolean printFormatError() {
 
-		try {
-			if(sheet.getSheetName().equalsIgnoreCase("Layers")){
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Error(s) in sheet: <font color=#ED0E3F><b>" + sheet.getSheetName() + "</b></font color></font>", 0, 0, null);
-			}else{
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4><br>Error(s) in sheet: <font color=#ED0E3F><b>" + sheet.getSheetName() + "</b></font color></font>", 0, 0, null);
-			}
-			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#088542>---------------------------------------------- </font color></font>", 0, 0, null);
 
-			if(!storeModifiedHeaderCells.isEmpty()){
-				hasError = true;
-				Collections.sort(storeModifiedHeaderCells);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Header cells are modified! Please correct this and try again.</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeModifiedHeaderCells + "</font color></font>", 0, 0, null);
-			}
-
-			if(!storeMergedCells.isEmpty()) {
-				hasError = true;
-				Collections.sort(storeMergedCells);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>Merged cells found! Please correct this and try again.</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeMergedCells + "</font color></font>", 0, 0, null);
-			}
-
-			if(!storeEmptyRows.isEmpty()) {
-				hasError = true;
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Empty rows found! Please remove them and try again.</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Row number: <font color=#ED0E3F>" + storeEmptyRows + "</font color></font>", 0, 0, null);
-			}		
-		} catch (BadLocationException | IOException e) {
-			JOptionPane.showMessageDialog(null, "An error has occurred (CommonValidator-HTMLkit). Application will now terminate.");
-			System.exit(0);
+		if(sheet.getSheetName().equalsIgnoreCase("Layers")){
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Error(s) in sheet: <font color=#ED0E3F><b>" + sheet.getSheetName() + "<br></b></font color></font>");
+		}else{
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4><br>Error(s) in sheet: <font color=#ED0E3F><b>" + sheet.getSheetName() + "<br></b></font color></font>");
 		}
+		validateMessage = validateMessage.concat("<font size = 3> <font color=#088542>---------------------------------------------- <br></font color></font>");
+
+		if(!storeModifiedHeaderCells.isEmpty()){
+			hasError = true;
+			Collections.sort(storeModifiedHeaderCells);
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Header cells are modified! Please correct this and try again.<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeModifiedHeaderCells + "<br></font color></font>");
+		}
+
+		if(!storeMergedCells.isEmpty()) {
+			hasError = true;
+			Collections.sort(storeMergedCells);
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>Merged cells found! Please correct this and try again.<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeMergedCells + "<br></font color></font>");
+		}
+
+		if(!storeEmptyRows.isEmpty()) {
+			hasError = true;
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Empty rows found! Please remove them and try again.<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Row number: <font color=#ED0E3F>" + storeEmptyRows + "<br></font color></font>");
+		}		
 		return hasError;
 	}
 
 	public void printValueError() {
 
-		try {
-			if(!storeWrongID.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>ID does not begin with '" + idAlphabet + "'</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeWrongID + "</font color></font>", 0, 0, null);
-			}
+		if(!storeWrongID.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>ID does not begin with '" + idAlphabet + "'<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeWrongID + "<br></font color></font>");
+		}
 
-			if(!storeDuplicateID.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Duplicate ID</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeDuplicateID + "</font color></font>", 0, 0, null);
-			}	
+		if(!storeDuplicateID.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Duplicate ID<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeDuplicateID + "<br></font color></font>");
+		}	
 
-			if(!storeMissingValueCells.isEmpty()) {
-				Collections.sort(storeMissingValueCells);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Missing values found (Mandatory)</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeMissingValueCells + "</font color></font>", 0, 0, null);
-			}
+		if(!storeMissingValueCells.isEmpty()) {
+			Collections.sort(storeMissingValueCells);
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Missing values found (Mandatory)<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeMissingValueCells + "<br></font color></font>");
+		}
 
-			if(!storeLineBreakCells.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Cell contains line break</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeLineBreakCells + "</font color></font>", 0, 0, null);
-			}
+		if(!storeLineBreakCells.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Cell contains line break<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeLineBreakCells + "<br></font color></font>");
+		}
 
-			if(!storeErrorMsg.isEmpty()) {
-				for(int errorCount = 0; errorCount < storeErrorMsg.size(); errorCount++) {
-					kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>" + storeErrorMsg.get(errorCount) + " <font color=#ED0E3F>(Row: " + storeErrorRow.get(errorCount) + ")</font color></font>", 0, 0,null);
-				}
+		if(!storeErrorMsg.isEmpty()) {
+			for(int errorCount = 0; errorCount < storeErrorMsg.size(); errorCount++) {
+				validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>" + storeErrorMsg.get(errorCount) + " <font color=#ED0E3F>(Row: " + storeErrorRow.get(errorCount) + ")<br></font color></font>");
 			}
+		}
 
-			if (!storeInvalidColorCells.isEmpty()) {
-				Collections.sort(storeInvalidColorCells);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Color reference not found! (Check Colors sheet)</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeInvalidColorCells + "</font color></font>", 0, 0, null);
-			}
+		if (!storeInvalidColorCells.isEmpty()) {
+			Collections.sort(storeInvalidColorCells);
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Color reference not found! (Check Colors sheet)<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeInvalidColorCells + "<br></font color></font>");
+		}
 
-			if(!storeReferenceErrorCells.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Reference style not found! Check style ID again.</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cell: <font color=#ED0E3F>" + storeReferenceErrorCells + "</font color></font>", 0, 0, null);
-			}
+		if(!storeReferenceErrorCells.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Reference style not found! Check style ID again.<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cell: <font color=#ED0E3F>" + storeReferenceErrorCells + "<br></font color></font>");
+		}
 
-			if(!storeErrorSize.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Size must be larger than 0.</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeErrorSize + "</font color></font>", 0, 0, null);
-			}
+		if(!storeErrorSize.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Size must be larger than 0.</font color><br></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeErrorSize + "<br></font color></font>");
+		}
 
-			if(!storeOpacityError.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Opacity must be from 0 to 1.</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeOpacityError + "</font color></font>", 0, 0, null);
-			}
+		if(!storeOpacityError.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Opacity must be from 0 to 1.<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeOpacityError + "<br></font color></font>");
+		}
 
-			if(!storeClassValueError.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Class name(s) only accept A-Z, a-z, 0-9, dash and underscores.</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeClassValueError + "</font color></font>", 0, 0, null);
-			}
+		if(!storeClassValueError.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Class name(s) only accept A-Z, a-z, 0-9, dash and underscores.<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeClassValueError + "<br></font color></font>");
+		}
 
-			if(storePencilLineJoin != null && !storePencilLineJoin.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Pencil line join is not valid</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storePencilLineJoin + "</font color></font>", 0, 0, null);
-			}
+		if(storePencilLineJoin != null && !storePencilLineJoin.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Pencil line join is not valid<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storePencilLineJoin + "<br></font color></font>");
+		}
 
-			if(storePencilLineCap != null && !storePencilLineCap.isEmpty()) {
-				kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Pencil line cap is not valid</font color></font>", 0, 0,null);
-				kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storePencilLineCap + "</font color></font>", 0, 0, null);
-			}
-		} catch (BadLocationException | IOException e) {
-			JOptionPane.showMessageDialog(null, "An error has occurred (CommonValidator-HTMLkit). Application will now terminate.");
-			System.exit(0);
+		if(storePencilLineCap != null && !storePencilLineCap.isEmpty()) {
+			validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> Pencil line cap is not valid<br></font color></font>");
+			validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storePencilLineCap + "<br></font color></font>");
 		}
 	}
 
 	public void printNoErrorMsg() {
 
-		try {
-			kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> No error found! </font color></font>", 0, 0,null);
-		} catch (BadLocationException | IOException e) {
-			JOptionPane.showMessageDialog(null, "An error has occurred (CommonValidator-HTMLkit). Application will now terminate.");
-			System.exit(0);
-		}
+		validateMessage = validateMessage.concat("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3> No error found! </font color><br></font>");
 	}
 }

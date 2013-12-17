@@ -95,16 +95,4 @@ public class CommonExport {
 			storeCartoCSS = storeCartoCSS.concat("[zoom<"+ (int)Math.round(maxScaleDenominator+1) + "]");
 		}
 	}
-	
-	public void printExportReport(ExportReport cartoReport, List<String> storeInvalidFont) {
-
-		if(storeInvalidFont != null && storeInvalidFont.isEmpty() == false) {
-			cartoReport.writeHeader("TextStyle");
-			cartoReport.writeTextToReport("<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>Specified font not found!</font color></font>");
-			cartoReport.writeTextToReport("<font size = 4> <font color=#0A23C4><font size = 3>** Default font <font color=#ED0E3F>\"Times New Roman Regular\" <font color=#0A23C4>is used.</font color></font>");
-			cartoReport.writeTextToReport("<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeInvalidFont + "</font color></font>");
-		}else {
-			cartoReport.writeTextToReport("<font size = 4> <font color=#088542><br><b>-> </b><font size = 3>CartoCSS files has been successfully exported. </font color></font>");
-		}
-	}
 }

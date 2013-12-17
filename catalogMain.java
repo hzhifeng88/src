@@ -25,14 +25,14 @@ public class CatalogMain extends JFrame {
 	public final static String templateFile = "Portrayal_Catalogue_TEMPLATE_v1.2";
 
 	private static CatalogMain mainWindow;
-	private boolean hasValidated = false;
 	private String excelFilePath;
 	private String fileDirectory;
 	private String fileName;
 	private String templateVersion;
-	private String catalogueVersion;
+	public String catalogueVersion;
 	private String selectedLanguage;
 	private String tempLang;
+	private String validateMessage = "";
 	private JFileChooser chooser;
 	private JComboBox<String> languageBox;
 	private JPanel northPanel;
@@ -45,15 +45,13 @@ public class CatalogMain extends JFrame {
 	private JTextPane errorPane;
 	private JTextPane aboutPane;
 	private JScrollPane scrollPane;
-	private List<Boolean> storeIsSheetsCorrect= new ArrayList<Boolean>();
 	private List<LayersClassObject> storeClassObjects = new ArrayList<LayersClassObject>();
-	private HTMLEditorKit kit;
-	private HTMLDocument doc;
+	public HTMLEditorKit kit;
+	public HTMLDocument doc;
 	private HTMLEditorKit kit1;
 	private HTMLDocument doc1;
 	private BeginValidate beginValidate;
 	private BeginExport beginExport;
-	private ExportReport cartoReport;
 	private LayersClassObject classObjects;
 	private Workbook workbook;
 	private Workbook templateWorkbook;
@@ -386,10 +384,48 @@ public class CatalogMain extends JFrame {
 		}
 	}
 
-	public void beginValidate() {
+	public boolean beginValidate(boolean onlyValidate) {
 
-		beginValidate = new BeginValidate(workbook, templateWorkbook, kit, doc);
-		storeIsSheetsCorrect = beginValidate.startValidate();
+		errorPane.setText("");
+		validateMessage = "";
+
+		if (excelFilePath == null) {
+
+			JOptionPane.showMessageDialog(null,"Please select an excel file first!");
+			return false;
+		} else {
+
+			setUserPropertise();
+			String tempString = excelFilePath.substring(excelFilePath.length() - 5, excelFilePath.length());
+
+			if (tempString.equalsIgnoreCase(".xlsx")) {
+
+				initializeRead();
+				catalogueVersion = getCatalogueCellA1();
+
+				if(checkCorrectVersionAndLanguage()) {
+
+					DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+					Date date = new Date();
+
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+					validateMessage = validateMessage.concat("<font size = 3> <font color=#0000FF>Loaded catalogue version: <font color=#088542>" + catalogueVersion + "<br></font color></font>");
+					validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br><br></font color></font>");
+
+					beginValidate = new BeginValidate(workbook, templateWorkbook);
+					boolean canExport = beginValidate.startValidate(validateMessage, onlyValidate, kit, doc);
+					setCursor(Cursor.getDefaultCursor());
+
+					return canExport;
+				}else {
+					return false;
+				}
+			} else {
+				JOptionPane.showMessageDialog(null, "Wrong file format!");
+			}
+		}
+		return true;
 	}
 
 	public void beginExport() {
@@ -403,25 +439,40 @@ public class CatalogMain extends JFrame {
 		if(isFileExist == false) {
 
 			List<String> storeInvalidFont = beginExport.exportNow(storeClassObjects);
-			mainWindow.setEnabled(false);  
-			String getSavePath = beginExport.getSaveDirectory();
-			cartoReport = new ExportReport(mainWindow, getSavePath);
-			beginExport.printExportReport(cartoReport, storeInvalidFont);
+			writeExportReport(beginExport.getSaveDirectory(), storeInvalidFont);
+			setCursor(Cursor.getDefaultCursor());
 		}else {
 
 			int response = JOptionPane.showConfirmDialog(null, "File already exist. Overwrite? (Yes/No)", "Confirmation", JOptionPane.YES_NO_OPTION);
 
 			if(response == JOptionPane.YES_OPTION)  {
 
-				List<String> storeInvalidFont = beginExport.exportNow(storeClassObjects);
-				mainWindow.setEnabled(false);  
-				String getSavePath = beginExport.getSaveDirectory();
-				cartoReport = new ExportReport(mainWindow, getSavePath);
-				beginExport.printExportReport(cartoReport, storeInvalidFont);
+				List<String> storeInvalidFont = beginExport.exportNow(storeClassObjects); 
+				writeExportReport(beginExport.getSaveDirectory(), storeInvalidFont);
 			}else {
 				JOptionPane.showMessageDialog(null, "Export unsuccessful, file already exist!");
 			}
+			setCursor(Cursor.getDefaultCursor());
 		}
+	}
+	
+	public void writeExportReport(String getSaveDirectory, List<String> storeInvalidFont) {
+		
+		try {
+			kit.insertHTML(doc, doc.getLength(), "<font size = 4><font color=#0A23C4><b>-> </b><font size = 3> Catalogue has been successfully exported to CartoCSS.<br></font color></font>", 0, 0,null);
+			kit.insertHTML(doc, doc.getLength(), "<font size = 3><font color=#0A23C4><b>Export Directory: " + getSaveDirectory + "</b><br><br></font color></font>", 0, 0,null);
+			
+			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4></b>Note:</font color></font>", 0, 0,null);
+			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#088542>----------------------------------------------</font color></font>", 0, 0,null);
+
+			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Sheet: <font color=#ED0E3F><b> TextStyle</b></font color></font>", 0, 0,null);
+			kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>Specified font not found!</font color></font>", 0, 0,null);
+			kit.insertHTML(doc, doc.getLength(), "<font size = 4> <font color=#0A23C4><b>-> </b><font size = 3>Default font <font color=#ED0E3F>\"Times New Roman Regular\" <font color=#0A23C4> used.</font color></font>", 0, 0,null);
+			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Cells: <font color=#ED0E3F>" + storeInvalidFont + "</font color></font>", 0, 0,null);
+		}catch (BadLocationException | IOException e) {
+			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-writeExportReport). Application will now terminate.");
+			System.exit(0);
+		} 
 	}
 
 	private class ButtonHandler implements ActionListener {
@@ -440,48 +491,9 @@ public class CatalogMain extends JFrame {
 
 					pathTextField.setText(excelFilePath);
 				}	
-
 			} else if (e.getSource() == validateButton) {
 
-				errorPane.setText("");
-
-				if (excelFilePath == null) {
-
-					JOptionPane.showMessageDialog(null,"Please select an excel file first!");
-
-				} else {
-
-					setUserPropertise();
-					hasValidated =  true;
-					String tempString = excelFilePath.substring(excelFilePath.length() - 5, excelFilePath.length());
-
-					if (tempString.equalsIgnoreCase(".xlsx")) {
-
-						initializeRead();
-						catalogueVersion = getCatalogueCellA1();
-						
-						if(checkCorrectVersionAndLanguage()) {
-							
-							DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-							Date date = new Date();
-
-							setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-							
-							try {
-								kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Loaded catalogue version: <font color=#088542>" + catalogueVersion + "</font color></font>", 0, 0, null);
-								kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br><br></font color></font>", 0, 0, null);
-							} catch (IOException | BadLocationException e1) {
-								JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-HTMLkit). Application will now terminate.");
-								System.exit(0);
-							} 
-
-							beginValidate();
-							setCursor(Cursor.getDefaultCursor());
-						}
-					} else {
-						JOptionPane.showMessageDialog(null, "Could not process selected file. Did you select the right file?");
-					}
-				}
+				beginValidate(true);
 			}
 			else if(e.getSource() == exitButton) {
 				System.exit(0);
@@ -489,11 +501,9 @@ public class CatalogMain extends JFrame {
 				aboutWindow();
 			}else if(e.getSource() == exportCSSButton) {
 
-				if(!hasValidated){
-					JOptionPane.showMessageDialog(null, "Please validate the catalogue first.");
-				}else if(storeIsSheetsCorrect.contains(false)){
-					JOptionPane.showMessageDialog(null, "Please correct all errors first.");
-				}else {
+				boolean canExport = beginValidate(false);
+
+				if(canExport) {
 					beginExport();
 				}
 			}else if(e.getSource() == languageBox) {
