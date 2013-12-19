@@ -30,11 +30,9 @@ public class CatalogMain extends JFrame {
 	private String fileName;
 	private String templateVersion;
 	public String catalogueVersion;
-	private String selectedLanguage;
 	private String tempLang;
 	private String validateMessage = "";
 	private JFileChooser chooser;
-	private JComboBox<String> languageBox;
 	private JPanel northPanel;
 	private JButton openFileButton;
 	private JButton validateButton;
@@ -61,7 +59,6 @@ public class CatalogMain extends JFrame {
 
 		createNorthPanel();
 		createSouthPanel();
-		loadTemplate("English");
 
 		getContentPane().add(northPanel, BorderLayout.NORTH);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -72,7 +69,7 @@ public class CatalogMain extends JFrame {
 		setLookAndFeel();
 
 		mainWindow = new CatalogMain();
-		mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " + templateFile.substring(20,33) + "en");
+		mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion);
 		mainWindow.setSize(530, 560);
 		mainWindow.setResizable(false);
 		mainWindow.setVisible(true);
@@ -130,18 +127,12 @@ public class CatalogMain extends JFrame {
 		exportCSSButton = new JButton(" Export to CartoCSS ");
 		exportCSSButton.addActionListener(new ButtonHandler());
 
-		String languages[] = {" English ", " German ", " French "};
-		languageBox = new JComboBox<String>(languages);
-		languageBox.setSelectedIndex(0);
-		languageBox.addActionListener(new ButtonHandler());
-
 		northPanel.add(pathTextField);
 		northPanel.add(openFileButton);
 		northPanel.add(validateButton);
 		northPanel.add(exitButton);
 		northPanel.add(aboutButton);
 		northPanel.add(exportCSSButton);
-		northPanel.add(languageBox);
 
 		getProperty();
 
@@ -265,22 +256,23 @@ public class CatalogMain extends JFrame {
 
 			switch(language) {
 
-			case "English":
+			case "en":
 				tempLang = "en.xlsx";
 				break;
-			case "German":
+			case "de":
 				tempLang = "de.xlsx";
 				break;
-			case "French":
+			case "fr":
 				tempLang = "fr.xlsx";
 				break;
 			default:
-				JOptionPane.showMessageDialog(null, "Invalid language.");
+				return;
 			}
 
-			templateVersion = templateFile.substring(29,33) + tempLang.substring(0,2);
+			templateVersion = templateFile.substring(29,33);
 			input = CatalogMain.class.getClassLoader().getResourceAsStream("resource/" + templateFile + tempLang);
 			templateWorkbook = WorkbookFactory.create(input);
+			mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " +  templateFile.substring(20,33) + tempLang.substring(0,2));
 
 		} catch (InvalidFormatException | IOException e) {
 			JOptionPane.showMessageDialog(null, "An error has occurred (CatalogMain-loadTemplate). Application will now terminate.");
@@ -290,16 +282,18 @@ public class CatalogMain extends JFrame {
 
 	public String getCatalogueCellA1() {
 
-		Sheet layersSheet = workbook.getSheet("Layers");
-		Row firstRow = layersSheet.getRow(0);
+		if(workbook.getSheet("Layers") != null) {
+			Sheet layersSheet = workbook.getSheet("Layers");
+			Row firstRow = layersSheet.getRow(0);
 
-		return firstRow.getCell(0).toString();
+			return firstRow.getCell(0).toString();
+		}
+		return null;
 	}
 
-	public boolean checkCorrectVersionAndLanguage() {
+	public boolean checkCorrectVersion(String catalogueVersion) {
 
 		if(!catalogueVersion.equalsIgnoreCase(templateVersion)) {
-			JOptionPane.showMessageDialog(null, "Selected catalogue is incompatible with template.");
 			return false;
 		}
 		return true;
@@ -403,29 +397,36 @@ public class CatalogMain extends JFrame {
 				initializeRead();
 				catalogueVersion = getCatalogueCellA1();
 
-				if(checkCorrectVersionAndLanguage()) {
+				if(catalogueVersion != null) {
+					loadTemplate(catalogueVersion.substring(catalogueVersion.length()-2, catalogueVersion.length()));
+					boolean correctVersion = checkCorrectVersion(catalogueVersion.substring(0, catalogueVersion.length()-2));
 
-					DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-					Date date = new Date();
+					if(correctVersion) {
 
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+						Date date = new Date();
 
-					validateMessage = validateMessage.concat("<font size = 3> <font color=#0000FF>Loaded catalogue version: <font color=#088542>" + catalogueVersion + "<br></font color></font>");
-					validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br><br></font color></font>");
+						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-					beginValidate = new BeginValidate(workbook, templateWorkbook);
-					boolean canExport = beginValidate.startValidate(validateMessage, onlyValidate, kit, doc);
-					setCursor(Cursor.getDefaultCursor());
+						validateMessage = validateMessage.concat("<font size = 3> <font color=#0000FF>Loaded catalogue version: <font color=#088542>" + catalogueVersion + "<br></font color></font>");
+						validateMessage = validateMessage.concat("<font size = 3> <font color=#0A23C4>Last validated: <font color=#088542>" + dateFormat.format(date) + "<br><br></font color></font>");
 
-					return canExport;
+						beginValidate = new BeginValidate(workbook, templateWorkbook);
+						boolean canExport = beginValidate.startValidate(validateMessage, onlyValidate, kit, doc);
+						setCursor(Cursor.getDefaultCursor());
+
+						return canExport;
+					}else {
+						JOptionPane.showMessageDialog(null, "Selected catalogue is incompatible with template.");
+					}
 				}else {
-					return false;
+					JOptionPane.showMessageDialog(null, "Selected catalogue is incompatible with template!");
 				}
 			} else {
 				JOptionPane.showMessageDialog(null, "Wrong file format!");
 			}
 		}
-		return true;
+		return false;
 	}
 
 	public void beginExport() {
@@ -455,13 +456,13 @@ public class CatalogMain extends JFrame {
 			setCursor(Cursor.getDefaultCursor());
 		}
 	}
-	
+
 	public void writeExportReport(String getSaveDirectory, List<String> storeInvalidFont) {
-		
+
 		try {
 			kit.insertHTML(doc, doc.getLength(), "<font size = 4><font color=#0A23C4><b>-> </b><font size = 3> Catalogue has been successfully exported to CartoCSS.<br></font color></font>", 0, 0,null);
 			kit.insertHTML(doc, doc.getLength(), "<font size = 3><font color=#0A23C4><b>Export Directory: " + getSaveDirectory + "</b><br><br></font color></font>", 0, 0,null);
-			
+
 			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#0A23C4></b>Note:</font color></font>", 0, 0,null);
 			kit.insertHTML(doc, doc.getLength(), "<font size = 3> <font color=#088542>----------------------------------------------</font color></font>", 0, 0,null);
 
@@ -506,11 +507,6 @@ public class CatalogMain extends JFrame {
 				if(canExport) {
 					beginExport();
 				}
-			}else if(e.getSource() == languageBox) {
-
-				selectedLanguage = languageBox.getSelectedItem().toString().trim();
-				loadTemplate(selectedLanguage);
-				mainWindow.setTitle("Portrayal Catalogue Valdiator " + validatorVersion + "   |   " +  templateFile.substring(20,33) + tempLang.substring(0,2));
 			}
 		}
 	}
